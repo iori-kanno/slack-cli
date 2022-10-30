@@ -1,11 +1,11 @@
 import { Member } from '@slack/web-api/dist/response/UsersListResponse';
 import compact from 'just-compact';
-import { client } from './index';
+import { getUsersList } from './slack/users';
 
 const cachedMap: Record<string, Member | undefined> = {};
 
 const makeCache = async () => {
-  const users = await client.users.list({
+  const users = await getUsersList({
     limit: 300,
   });
   users.members?.forEach((member) => {

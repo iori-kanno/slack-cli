@@ -6,7 +6,7 @@ const webpack = require('webpack');
 module.exports = {
   target: 'node',
 
-  mode: 'production',
+  mode: 'development',
 
   entry: './src/entry.ts',
 

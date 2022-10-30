@@ -1,6 +1,6 @@
 import arg from 'arg';
 import { invalidOptionText, listUpMembersHelpText } from '../lib/messages';
-import { CliExecFn } from '../types';
+import { CliExecFn, SlackDemoOptions } from '../types';
 import * as Log from '../lib/log';
 import { aggregateReactions } from '../api/reaction';
 import { parseSlackUrl } from '../lib/helper';
@@ -43,14 +43,14 @@ export const exec: CliExecFn = async (argv) => {
     console.log(listUpMembersHelpText);
     return;
   }
+  const options: SlackDemoOptions = {
+    asBot: false,
+    dryRun: args['--dry-run'],
+  };
   if (args['--url']) {
     const { channel, ts } = parseSlackUrl(args['--url']);
-    await aggregateReactions(channel, ts, args['--dry-run']);
+    await aggregateReactions(channel, ts, options);
   } else if (args['--channel'] && args['--timestamp']) {
-    await aggregateReactions(
-      args['--channel'],
-      args['--timestamp'],
-      args['--dry-run']
-    );
+    await aggregateReactions(args['--channel'], args['--timestamp'], options);
   }
 };

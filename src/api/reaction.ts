@@ -1,12 +1,15 @@
-import { client } from './index';
 import { Reaction } from '@slack/web-api/dist/response/ReactionsGetResponse';
 import { mapUserIdsToMembers } from './user';
 import * as Log from '../lib/log';
 import { invalidOptionText } from '../lib/messages';
+import { getReactions } from './slack/reactions';
+import { SlackDemoOptions } from '../types';
+import { postMessageToSlack } from './slack/chat';
 
-export const getReactions = async (
+const getReactionsOnPost = async (
   channel?: string,
-  ts?: string
+  ts?: string,
+  options?: SlackDemoOptions
 ): Promise<Reaction[] | undefined> => {
   if (!(channel && ts)) {
     Log.error(invalidOptionText);
@@ -14,10 +17,13 @@ export const getReactions = async (
   }
 
   try {
-    const res = await client.reactions.get({
-      channel,
-      timestamp: ts,
-    });
+    const res = await getReactions(
+      {
+        channel,
+        timestamp: ts,
+      },
+      options
+    );
     console.log(res.message?.reactions);
     return res.message?.reactions;
   } catch (e) {
@@ -28,9 +34,9 @@ export const getReactions = async (
 export const aggregateReactions = async (
   channel?: string,
   ts?: string,
-  dry?: boolean
+  options?: SlackDemoOptions
 ) => {
-  const reactions = await getReactions(channel, ts);
+  const reactions = await getReactionsOnPost(channel, ts);
   if (!(reactions && channel)) {
     Log.error('reactions not found');
     return;
@@ -56,15 +62,18 @@ export const aggregateReactions = async (
         .join('\n')}` +
       `\n\nリアクションした人: 【 ${uniqUserNames} 】(${members.length})`;
 
-    if (dry) {
+    if (options?.dryRun) {
       Log.success('\n' + text);
       return;
     }
-    const res = await client.chat.postMessage({
-      channel,
-      text,
-      thread_ts: ts,
-    });
+    const res = await postMessageToSlack(
+      {
+        channel,
+        text,
+        thread_ts: ts,
+      },
+      options
+    );
     if (res.ok) Log.success('');
     else Log.error(res.error || '');
   } catch (e) {
