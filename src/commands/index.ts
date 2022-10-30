@@ -2,7 +2,7 @@ import { notifyNeedUpdateCLI } from '../lib/notify-update';
 import { CliExecFn } from '../types';
 import * as version from './version';
 import * as help from './help';
-import * as listUpMembers from './listup-members';
+import * as listUpReactions from './listup-reactions';
 import * as Log from '../lib/log';
 import { commandListText } from '../lib/messages';
 
@@ -15,7 +15,7 @@ export async function exec(
   options: ExecOptions = { canNotifyUpdate: false }
 ) {
   const commands: Commands = {
-    'listup-members': async () => listUpMembers.exec(),
+    'listup:reactions': async () => listUpReactions.exec(),
     '--help': async () => help.exec(),
     '-h': async () => help.exec(),
     '--version': async () => version.exec(),

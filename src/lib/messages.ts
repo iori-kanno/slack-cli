@@ -1,18 +1,18 @@
 export const commandListText = `
 Command:
-  slack-demo listup-members   指定された投稿に付いているリアクションを修正してスレッドに投稿する
-  slack-demo --version, -v    slack-demo のバージョンを表示
-  slack-demo --help, -h       ヘルプ
+  slack-demo listup:reactions   指定された投稿に付いているリアクションを修正してスレッドに投稿する
+  slack-demo --version, -v      slack-demo のバージョンを表示
+  slack-demo --help, -h         ヘルプ
   👇  詳細
   TODO: URL か何か
 `;
 
 export const listUpMembersHelpText = `
 Command:
-  slack-demo listup-members    指定された投稿に付いているリアクションを修正してスレッドに投稿する
+  slack-demo listup:reactions    指定された投稿に付いているリアクションを修正してスレッドに投稿する
 
 Usage:
-  slack-demo listup-members [options]
+  slack-demo listup:reactions [options]
 
 Options:
   --url, -u         指定したい投稿の slack url
