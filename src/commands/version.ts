@@ -8,5 +8,5 @@ export const exec: CliExecFn = () => {
     Log.error('バージョンを取得できませんでした');
     return;
   }
-  console.log(version);
+  Log.success(version);
 };

@@ -1,17 +1,44 @@
 import colors from 'colors/safe';
 
-export function error(message: string) {
-  console.error(colors.red('error:'), message);
+let isDebug = false;
+
+export function setDebug(enabled?: boolean) {
+  isDebug = enabled ?? false;
 }
 
-export function success(message: string) {
-  console.log(colors.green('success:'), message);
+export function error(message: any, ...optionalParams: any[]) {
+  console.error(colors.red('error:'), message, optionalParams);
 }
 
-export function created(name: string) {
-  console.log('created:', colors.green(name));
+export function success(message: any, ...optionalParams: any[]) {
+  console.log(
+    colors.green('success:'),
+    message,
+    optionalParams.length === 0 ? '' : optionalParams
+  );
 }
 
-export function warn(message: string) {
-  console.warn(colors.yellow('warn:'), message);
+export function debug(message: any, ...optionalParams: any[]) {
+  if (!isDebug) return;
+  console.log(
+    colors.gray('debug:'),
+    message,
+    optionalParams.length === 0 ? '' : optionalParams
+  );
+}
+
+export function created(name: string, ...optionalParams: any[]) {
+  console.log(
+    'created:',
+    colors.green(name),
+    optionalParams.length === 0 ? '' : optionalParams
+  );
+}
+
+export function warn(message: any, ...optionalParams: any[]) {
+  console.warn(
+    colors.yellow('warn:'),
+    message,
+    optionalParams.length === 0 ? '' : optionalParams
+  );
 }

@@ -3,6 +3,10 @@ import { CliExecFn } from '../types';
 import * as version from './version';
 import * as help from './help';
 import * as listUpReactions from './listup-reactions';
+import * as getLatestPosts from './get-latest-posts';
+import * as getReactionsForUser from './get-reactions-for-user';
+import * as aggregateReactions from './aggregate-reactions';
+import * as joinAllPublicChannels from './join-all-public-channels';
 import * as Log from '../lib/log';
 import { commandListText } from '../lib/messages';
 
@@ -16,6 +20,10 @@ export async function exec(
 ) {
   const commands: Commands = {
     'listup:reactions': async () => listUpReactions.exec(),
+    'get:posts': async () => getLatestPosts.exec(),
+    'get:reactions': async () => getReactionsForUser.exec(),
+    'aggregate:reactions': async () => aggregateReactions.exec(),
+    'join:public-channels': async () => joinAllPublicChannels.exec(),
     '--help': async () => help.exec(),
     '-h': async () => help.exec(),
     '--version': async () => version.exec(),
@@ -29,7 +37,7 @@ export async function exec(
 
   if (!commands[execCommandName]) {
     Log.error('該当するCLIコマンドが存在しません');
-    console.log(commandListText);
+    Log.warn(commandListText);
     return;
   }
 

@@ -1,4 +1,5 @@
 import { UsersListArguments, UsersListResponse } from '@slack/web-api';
+import { Member } from '@slack/web-api/dist/response/UsersListResponse';
 import { botClient, userClient } from './index';
 import { SlackDemoOptions } from '../../types';
 
@@ -8,4 +9,19 @@ export const getUsersList = async (
 ): Promise<UsersListResponse> => {
   if (options?.asBot) return botClient.users.list(args);
   return userClient.users.list(args);
+};
+
+export const getAllUsers = async (
+  args: UsersListArguments,
+  options?: SlackDemoOptions
+): Promise<Member[]> => {
+  const members = Array<Member>();
+  let cursor: string | undefined;
+  do {
+    const res = await getUsersList({ ...args, cursor }, options);
+    cursor = res.response_metadata?.next_cursor;
+    members.push(...(res.members || []));
+  } while (cursor);
+
+  return members;
 };

@@ -1,26 +1,24 @@
 import arg from 'arg';
-import { invalidOptionText, listUpMembersHelpText } from '../lib/messages';
+import { invalidOptionText, aggregateReactionsHelpText } from '../lib/messages';
 import { CliExecFn, SlackDemoOptions } from '../types';
 import * as Log from '../lib/log';
-import { aggregateReactions } from '../api/reaction';
-import { parseSlackUrl } from '../lib/helper';
+import {
+  getAllChannels,
+  inviteToChannel,
+  joinChannel,
+} from '../api/slack/channel';
 
 function parseArgs(argv?: string[]) {
   try {
     return arg(
       {
         // Types
-        '--url': String,
-        '--timestamp': String,
-        '--channel': String,
         '--dry-run': Boolean,
         '--help': Boolean,
+        '--debug': Boolean,
 
         // Alias
         '-h': '--help',
-        '-u': '--url',
-        '-t': '--timestamp',
-        '-c': '--channel',
       },
       { argv }
     );
@@ -30,7 +28,7 @@ function parseArgs(argv?: string[]) {
     } else {
       Log.error(e);
     }
-    Log.warn(listUpMembersHelpText);
+    Log.error('TODO: 記載');
     return null;
   }
 }
@@ -40,17 +38,24 @@ export const exec: CliExecFn = async (argv) => {
   if (args === null) return;
 
   if (args['--help']) {
-    Log.success(listUpMembersHelpText);
+    Log.success('TODO: 記載');
     return;
   }
+
   const options: SlackDemoOptions = {
-    asBot: false,
     dryRun: args['--dry-run'],
+    asBot: true,
   };
-  if (args['--url']) {
-    const { channel, ts } = parseSlackUrl(args['--url']);
-    await aggregateReactions(channel, ts, options);
-  } else if (args['--channel'] && args['--timestamp']) {
-    await aggregateReactions(args['--channel'], args['--timestamp'], options);
-  }
+
+  await getAllChannels({}, options).then((channels) => {
+    return channels
+      .filter(
+        (ch) =>
+          ch.is_channel && !ch.is_member && !ch.is_archived && !ch.is_private
+      )
+      .map((ch) =>
+        inviteToChannel({ channel: ch.id!, users: 'U03CB2YKVSQ' }, options)
+      );
+    // .map((ch) => joinChannel({ channel: ch.id! }, options))
+  });
 };

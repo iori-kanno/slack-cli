@@ -1,18 +1,25 @@
 import { Member } from '@slack/web-api/dist/response/UsersListResponse';
 import compact from 'just-compact';
-import { getUsersList } from './slack/users';
+import { getAllUsers } from './slack/users';
 
 const cachedMap: Record<string, Member | undefined> = {};
 
 const makeCache = async () => {
-  const users = await getUsersList({
+  const members = await getAllUsers({
     limit: 300,
   });
-  users.members?.forEach((member) => {
+  members?.forEach((member) => {
     if (member.id) {
       cachedMap[member.id] = member;
     }
   });
+};
+
+export const retrieveAllUser = async (): Promise<Member[]> => {
+  if (Object.keys(cachedMap).length == 0) {
+    await makeCache();
+  }
+  return compact(Object.values(cachedMap));
 };
 
 export const mapUserIdsToMembers = async (
@@ -32,4 +39,15 @@ export const mapUserIdToMember = async (
     await makeCache();
   }
   return cachedMap[userId];
+};
+
+export const mapUserNameToMember = async (
+  userName: string
+): Promise<Member | undefined> => {
+  if (Object.keys(cachedMap).length == 0) {
+    await makeCache();
+  }
+  return Object.values(cachedMap).find(
+    (m) => m?.name === userName || m?.real_name === userName
+  );
 };
