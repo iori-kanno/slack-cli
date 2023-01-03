@@ -1,15 +1,16 @@
 export const commandListText = `
 Command:
-  slack-demo listup:reactions   指定された投稿に付いているリアクションを修正してスレッドに投稿する
-  slack-demo --version, -v      slack-demo のバージョンを表示
-  slack-demo --help, -h         ヘルプ
+  slack-demo listup:reactions    指定された投稿に付いているリアクションを集計してスレッドに投稿する
+  slack-demo aggregate:reactions 指定された期間内に指定されたリアクション数が多いユーザーを最大5名リストアップする
+  slack-demo --version, -v       slack-demo のバージョンを表示
+  slack-demo --help, -h          ヘルプ
   👇  詳細
   TODO: URL か何か
 `;
 
 export const listUpMembersHelpText = `
 Command:
-  slack-demo listup:reactions    指定された投稿に付いているリアクションを修正してスレッドに投稿する
+  slack-demo listup:reactions    指定された投稿に付いているリアクションを集計してスレッドに投稿する
 
 Usage:
   slack-demo listup:reactions [options]
@@ -27,12 +28,14 @@ export const invalidOptionText = `⚠️ 不正なオプションが含まれて
 
 export const aggregateReactionsHelpText = `
 Command:
-  slack-demo aggregate:reactions    指定された投稿に付いているリアクションを修正してスレッドに投稿する
+  slack-demo aggregate:reactions    指定された期間内に指定されたリアクション数が多いユーザーを最大5名リストアップする
 
 Usage:
   slack-demo aggregate:reactions [options]
 
 Options:
+  --channel-id      投稿先チャンネルID。--channel-id or --channel-name が必須。
+  --channel-name    投稿先チャンネル名。--channel-id or --channel-name が必須。
   --start-date      集計対象の期間の開始日時。指定例: '2022-12-01T00:00:00'
   --end-date        集計対象の期間の終了日時。指定例: '2022-12-01T00:00:00'
   --reactions       集計対象のリアクション文字列。カンマ区切りで指定する。デフォルト '+1,pray'

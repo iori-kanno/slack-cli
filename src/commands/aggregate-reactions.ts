@@ -7,6 +7,8 @@ import { getAllReactedItems } from '../api/slack/reactions';
 import { aggregateReactionsForEachMember } from '../api/reaction';
 import { Item } from '@slack/web-api/dist/response/ReactionsListResponse';
 import { postMessageToSlack } from '../api/slack/chat';
+import { getAllChannels } from '../api/slack/channel';
+import { Channel } from '@slack/web-api/dist/response/ChannelsListResponse';
 
 function parseArgs(argv?: string[]) {
   try {
@@ -15,6 +17,8 @@ function parseArgs(argv?: string[]) {
         // Types
         '--start-date': String,
         '--end-date': String,
+        '--channel-name': String,
+        '--channel-id': String,
         '--reactions': String,
         '--dry-run': Boolean,
         '--as-user': Boolean,
@@ -55,8 +59,6 @@ export const exec: CliExecFn = async (argv) => {
     endDate: args['--end-date'] ? new Date(args['--end-date']) : undefined,
   };
 
-  // デバッグ
-  // options.asBot = false;
   if (!options.endDate) options.endDate = new Date();
   if (!options.startDate) {
     options.startDate = options.endDate;
@@ -67,17 +69,22 @@ export const exec: CliExecFn = async (argv) => {
     ? args['--reactions'].split(',')
     : ['to-be-oriented', 'feelspecial', 'simplify-x', 'simplify-x-2'];
 
+  // dry-run でないなら投稿先チャンネルは必須
+  let channel: Channel | undefined;
+  if (!options.dryRun) {
+    channel = (await getAllChannels({}, options)).find(
+      (c) => c.id === args['--channel-id'] || c.name === args['--channel-name']
+    );
+    if (!channel) {
+      Log.error('投稿先チャンネルを指定してください。');
+      return;
+    }
+  }
+
   const users = (await retrieveAllUser()).filter(
     (u) => !u.is_bot && !u.deleted
   );
 
-  // デバッグ
-  // const users = [
-  //   { id: 'U01U4B66VBM', real_name: 'fujita', name: undefined },
-  //   { id: 'U031WLP12UA', real_name: 'kanno', name: undefined },
-  //   { id: 'UNUC6NN9L', real_name: '小瀬 敦也', name: undefined },
-  //   { id: 'U01HR2TBAGP', real_name: 'horita', name: undefined },
-  // ];
   let items: Item[] = [];
   for (const member of users) {
     items.push(...(await getAllReactedItems({ user: member?.id }, options)));
@@ -135,13 +142,11 @@ export const exec: CliExecFn = async (argv) => {
     Log.success(blocks);
     await postMessageToSlack(
       {
-        channel: /*args['--debug'] ? 'C04DQSKPJSY' :*/ 'C046UMA9VNZ',
-        blocks: [
-          `${options.startDate?.toLocaleDateString() ?? '未設定'}~${
-            options.endDate?.toLocaleDateString() ?? '現在'
-          }の期間で最もリアクションを貰った人を表彰します🎉`,
-          ...blocks,
-        ].flatMap((b) => [
+        channel: channel!.id!,
+        text: `${options.startDate?.toLocaleDateString() ?? '未設定'}~${
+          options.endDate?.toLocaleDateString() ?? '現在'
+        }の期間で最もリアクションを貰った人を表彰します🎉`,
+        blocks: blocks.flatMap((b) => [
           { type: 'divider' },
           {
             type: 'section',

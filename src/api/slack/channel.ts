@@ -51,6 +51,6 @@ export const inviteToChannel = async (
   Log.success(
     `${options?.asBot} inviteToChannel({ channel: ${args.channel}, users: ${args.users} })`
   );
-  // if (options?.asBot) return botClient.conversations.invite(args);
+  if (options?.asBot) return botClient.conversations.invite(args);
   return userClient.conversations.invite(args);
 };

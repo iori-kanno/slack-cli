@@ -7,10 +7,7 @@ import {
 import { botClient, userClient } from './index';
 import { SlackDemoOptions } from '../../types';
 import * as Log from '../../lib/log';
-import {
-  Item,
-  Reaction,
-} from '@slack/web-api/dist/response/ReactionsListResponse';
+import { Item } from '@slack/web-api/dist/response/ReactionsListResponse';
 import { convertTsToDate, isWithinByDate } from '../../lib/helper';
 import { mapUserIdToMember } from '../user';
 
@@ -64,6 +61,7 @@ export const getAllReactedItems = async (
         user?.real_name || user?.name
       } (${user?.id})`
     );
+    // TODO: エラーになるケースを特定して特殊対応をなくす
     if (args.user === 'U01U4B66VBM') {
       // フジタくんのばあいここで終わりにする
       break;
@@ -73,13 +71,8 @@ export const getAllReactedItems = async (
     }
     if (emptyCount > 1) {
       cursor = undefined;
-      Log.debug(' ... stopped request to retrieve additional items');
+      Log.debug(' ... 追加取得を停止します');
     }
-    // 差が200件以上あるならそれ以上はリクエストしない
-    // if ((res.items || []).length - newItems.length > (args.limit ?? 1550) / 2) {
-    //   cursor = undefined;
-    //   Log.debug(' ... stopped request to retrieve additional items');
-    // }
   } while (cursor);
 
   return items;
