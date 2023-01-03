@@ -1488,10 +1488,10 @@ just-compact@3.1.1:
   resolved "https://registry.yarnpkg.com/just-compact/-/just-compact-3.1.1.tgz#87921e9b80e08b3f626ec2aefcdb698afa7a3d2c"
   integrity sha512-wp62QS/VNn2aJzzChxX8FqkhXhkqwB/Ibyx+FX5srIqXb4QJXKCLGydpLVKhhAoJCAyTGAkrGSoSyq+Pyr9+qw==
 
-just-safe-get@4.1.1:
-  version "4.1.1"
-  resolved "https://registry.yarnpkg.com/just-safe-get/-/just-safe-get-4.1.1.tgz#7ed27d2b6b57c0fbc2656e4872ec4da88cd27d37"
-  integrity sha512-Tgnp513ipAnS8oneoirig1V4buSR6aiuflN+BBm133Tz+hs58tad0bat6MkMSCPr2QtCQaHQ6BWC/aadWPGp9g==
+just-group-by@2.2.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/just-group-by/-/just-group-by-2.2.0.tgz#814be9b4ab55b1bed07c3df6587b7fbbfe0f9c9c"
+  integrity sha512-brZocDSmkvDYc+FOr07GiTar4cp7K6OB9huVOrj5LX+iXfCe3hTvn2KGM811LE/SBQkCzuYDDEcG8HA/dKDrnw==
 
 kind-of@^6.0.2:
   version "6.0.3"
