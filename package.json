@@ -15,8 +15,7 @@
     "slack-demo": "node dist/slack-demo.js"
   },
   "dependencies": {
-    "dayjs": "1.11.6",
-    "just-safe-get": "4.1.1"
+    "dayjs": "1.11.6"
   },
   "devDependencies": {
     "@slack/web-api": "6.7.2",
