@@ -148,10 +148,13 @@ export const exec: CliExecFn = async (argv) => {
     await postMessageToSlack(
       {
         channel: channel!.id!,
-        text: `${options.startDate?.toLocaleDateString() ?? '未設定'}~${
-          options.endDate?.toLocaleDateString() ?? '現在'
-        }の期間で最もリアクションを貰った人を表彰します🎉`,
-        blocks: blocks.flatMap((b) => [
+        text: '',
+        blocks: [
+          `${options.startDate?.toLocaleDateString() ?? '未設定'}~${
+            options.endDate?.toLocaleDateString() ?? '現在'
+          }の期間で最もリアクションを貰った人を表彰します🎉`,
+          ...blocks,
+        ].flatMap((b) => [
           { type: 'divider' },
           {
             type: 'section',
