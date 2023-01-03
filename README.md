@@ -29,8 +29,8 @@ SLACK_TEAM_ID | ❌ | Slack の team_id。設定したトークンが複数チ�
 
 コマンド名 | 概要
 :-- | :--
-[aggregate:reactions](#aggregate:reactions) | 指定された期間内に指定されたリアクション数が多いユーザーを最大5名リストアップする
-[listup:reactions](#listup:reactions) | 指定された投稿に付いているリアクションを集計してスレッドに投稿します
+[aggregate:reactions](#aggregatereactions) | 指定された期間内に指定されたリアクション数が多いユーザーを最大5名リストアップする
+[listup:reactions](#listupreactions) | 指定された投稿に付いているリアクションを集計してスレッドに投稿します
 
 
 ### aggregate:reactions
