@@ -143,7 +143,10 @@ export const aggregateReactionsForEachMember = (
           const rName = reaction.name.replace(skinToneRegex, '');
           mDict[rName] =
             (mDict[rName] ?? 0) +
-            (reaction.count ?? reaction.users?.length ?? 0);
+            (reaction.users?.filter((uid) => uid !== item.message?.user)
+              .length ??
+              reaction.count ??
+              0);
         }
         break;
       case 'file':
