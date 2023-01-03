@@ -1,19 +1,19 @@
 export const commandListText = `
 Command:
-  slack-demo listup:reactions    指定された投稿に付いているリアクションを集計してスレッドに投稿する
-  slack-demo aggregate:reactions 指定された期間内に指定されたリアクション数が多いユーザーを最大5名リストアップする
-  slack-demo --version, -v       slack-demo のバージョンを表示
-  slack-demo --help, -h          ヘルプ
+  slack-cli listup:reactions    指定された投稿に付いているリアクションを集計してスレッドに投稿する
+  slack-cli aggregate:reactions 指定された期間内に指定されたリアクション数が多いユーザーを最大5名リストアップする
+  slack-cli --version, -v       slack-cli のバージョンを表示
+  slack-cli --help, -h          ヘルプ
   👇  詳細
   TODO: URL か何か
 `;
 
 export const listUpMembersHelpText = `
 Command:
-  slack-demo listup:reactions    指定された投稿に付いているリアクションを集計してスレッドに投稿する
+  slack-cli listup:reactions    指定された投稿に付いているリアクションを集計してスレッドに投稿する
 
 Usage:
-  slack-demo listup:reactions [options]
+  slack-cli listup:reactions [options]
 
 Options:
   --url, -u         指定したい投稿の slack url
@@ -28,10 +28,10 @@ export const invalidOptionText = `⚠️ 不正なオプションが含まれて
 
 export const aggregateReactionsHelpText = `
 Command:
-  slack-demo aggregate:reactions    指定された期間内に指定されたリアクション数が多いユーザーを最大5名リストアップする
+  slack-cli aggregate:reactions    指定された期間内に指定されたリアクション数が多いユーザーを最大5名リストアップする
 
 Usage:
-  slack-demo aggregate:reactions [options]
+  slack-cli aggregate:reactions [options]
 
 Options:
   --channel-id      投稿先チャンネルID。--channel-id or --channel-name が必須。
