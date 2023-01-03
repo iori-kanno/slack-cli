@@ -12,7 +12,7 @@ module.exports = {
 
   output: {
     clean: true,
-    filename: 'slack-demo.js',
+    filename: 'slack-cli.js',
     path: `${__dirname}/dist`,
   },
 
@@ -73,7 +73,7 @@ module.exports = {
   plugins: [
     // ビルドファイルの先頭に shebang を追加する
     new webpack.BannerPlugin({ banner: '#!/usr/bin/env node', raw: true }),
-    // 出力先のファイルを`slack-demo.js`のみにするための設定
+    // 出力先のファイルを`slack-cli.js`のみにするための設定
     new webpack.optimize.LimitChunkCountPlugin({ maxChunks: 1 }),
   ],
 };

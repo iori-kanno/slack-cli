@@ -1,10 +1,10 @@
 {
-  "name": "slack-demo",
+  "name": "slack-cli",
   "version": "0.1.0",
   "description": "Slack Demo",
   "license": "MIT",
   "bin": {
-    "slack-demo": "dist/slack-demo.js"
+    "slack-cli": "dist/slack-cli.js"
   },
   "files": [
     "dist"
@@ -12,7 +12,7 @@
   "scripts": {
     "dev": "nodemon ./src/entry.ts",
     "build": "webpack -c webpack.js",
-    "slack-demo": "node dist/slack-demo.js"
+    "slack-cli": "node dist/slack-cli.js"
   },
   "dependencies": {
     "dayjs": "1.11.6"

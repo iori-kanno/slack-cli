@@ -8,7 +8,7 @@ export const CLI_UPDATE_CHECK_INTERVAL = 1000 * 60 * 60 * 12;
 /** アップデートが必要なら、アップデートを促すアラートを cli に表示する */
 export async function notifyNeedUpdateCLI() {
   return;
-  // const config = new Configstore('slack-demo', { lastUpdateCheck: Date.now() });
+  // const config = new Configstore('slack-cli', { lastUpdateCheck: Date.now() });
 
   // // 一日前にチェックしていれば何も表示しない
   // if (Date.now() - config.get('lastUpdateCheck') < CLI_UPDATE_CHECK_INTERVAL) {
