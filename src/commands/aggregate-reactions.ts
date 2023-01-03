@@ -9,6 +9,7 @@ import { Item } from '@slack/web-api/dist/response/ReactionsListResponse';
 import { postMessageToSlack } from '../api/slack/chat';
 import { getAllChannels } from '../api/slack/channel';
 import { Channel } from '@slack/web-api/dist/response/ChannelsListResponse';
+import groupBy from 'just-group-by';
 
 function parseArgs(argv?: string[]) {
   try {
@@ -112,20 +113,24 @@ export const exec: CliExecFn = async (argv) => {
   const blocks: string[] = [];
   const keys = [...reactionNameToCount.keys()];
   for (const key of keys) {
-    const list = reactionNameToCount
-      .get(key)!
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 5);
-    if (list.length === 0) {
+    // 同じ獲得数でまとめる
+    const candidates = groupBy(reactionNameToCount.get(key)!, (c) => c.count);
+    if (Object.keys(candidates).length === 0) {
       blocks.push(`:${key}: を獲得した人はいませんでした。`);
       continue;
+    }
+    // 獲得数が一番多い順に 5位まで、もしくは同列順位を含めて 5人以上になるようにリストアップする
+    const list: { mid: string; count: number; rank: number }[] = [];
+    for (const c of Object.entries(candidates).reverse()) {
+      if (list.length >= 5) break;
+      list.push(...c[1].map((m) => ({ ...m, rank: list.length + 1 })));
     }
     const text = `最も :${key}: を獲得したトップ${
       list.length
     }は、この人たちです！\n${list
-      .map(({ mid, count }, index) => {
+      .map(({ mid, count, rank }) => {
         const member = users.find((m) => m.id === mid);
-        return `${index + 1}. <@${mid}> (${count})`;
+        return `${rank}. <@${mid}> (${count})`;
       })
       .join('\n')}`;
     blocks.push(text);

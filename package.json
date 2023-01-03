@@ -30,6 +30,7 @@
     "eslint": "8.26.0",
     "eslint-config-prettier": "8.5.0",
     "just-compact": "3.1.1",
+    "just-group-by": "2.2.0",
     "node-fetch": "3.2.10",
     "node-loader": "2.0.0",
     "nodemon": "2.0.20",
