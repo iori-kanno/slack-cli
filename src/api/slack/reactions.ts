@@ -36,15 +36,21 @@ export const getAllReactedItems = async (
   let cursor: string | undefined;
   let emptyCount = 0;
   do {
-    const res = await getReactionsList(
-      { limit: 800, full: true, ...args, cursor },
-      options
-    );
-    cursor = res.response_metadata?.next_cursor;
+    let res: ReactionsListResponse | undefined = undefined;
+    try {
+      res = await getReactionsList(
+        { limit: 800, full: true, ...args, cursor },
+        options
+      );
+    } catch (e) {
+      Log.debug('error with ', user?.name);
+      Log.error(e);
+    }
+    cursor = res?.response_metadata?.next_cursor;
     // 期間が設定されていたらフィルターする
     const newItems =
       (options?.startDate || options?.endDate
-        ? res.items?.filter((item) => {
+        ? res?.items?.filter((item) => {
             if (item.message?.ts) {
               return isWithinByDate(
                 convertTsToDate(item.message.ts),
@@ -54,19 +60,16 @@ export const getAllReactedItems = async (
             }
             return false;
           })
-        : res.items) || [];
+        : res?.items ?? []) || [];
     items.push(...newItems);
     Log.debug(
-      `added ${newItems.length} / ${(res.items ?? []).length} items for ${
-        user?.real_name || user?.name
-      } (${user?.id})`
+      `added ${String(newItems.length).padStart(3, ' ')} / ${String(
+        (res?.items ?? []).length
+      ).padStart(3, ' ')} items for ${user?.real_name || user?.name} (${
+        user?.id
+      })`
     );
-    // TODO: エラーになるケースを特定して特殊対応をなくす
-    if (args.user === 'U01U4B66VBM') {
-      // フジタくんのばあいここで終わりにする
-      break;
-    }
-    if ((res.items ?? []).length > 0 && newItems.length == 0) {
+    if ((res?.items ?? []).length > 0 && newItems.length == 0) {
       emptyCount += 1;
     }
     if (emptyCount > 1) {
