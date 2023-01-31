@@ -73,7 +73,7 @@ export const exec: CliExecFn = async (argv) => {
   // dry-run でないなら投稿先チャンネルは必須
   let channel: Channel | undefined;
   if (!options.dryRun) {
-    channel = (await getAllChannels({}, options)).find(
+    channel = (await getAllChannels({ types: 'public_channel' }, options)).find(
       (c) => c.id === args['--channel-id'] || c.name === args['--channel-name']
     );
     if (!channel) {
@@ -83,7 +83,12 @@ export const exec: CliExecFn = async (argv) => {
   }
 
   const users = (await retrieveAllUser()).filter(
-    (u) => !u.is_bot && !u.deleted
+    (u) =>
+      !u.is_bot &&
+      !u.deleted &&
+      !u.is_restricted &&
+      !u.is_ultra_restricted &&
+      !u.is_workflow_bot
   );
 
   let items: Item[] = [];
