@@ -1,5 +1,8 @@
 import arg from 'arg';
-import { invalidOptionText, aggregateReactionsHelpText } from '../lib/messages';
+import {
+  invalidOptionText,
+  byEachMemberReactedHelpText,
+} from '../lib/messages';
 import { CliExecFn, SlackDemoOptions } from '../types';
 import * as Log from '../lib/log';
 import { retrieveAllUser } from '../api/user';
@@ -10,6 +13,8 @@ import { postMessageToSlack } from '../api/slack/chat';
 import { getAllChannels } from '../api/slack/channel';
 import { Channel } from '@slack/web-api/dist/response/ChannelsListResponse';
 import groupBy from 'just-group-by';
+import { aggregateUniqItemsReactedByMembers } from '../lib/aggregator';
+import { Member } from '@slack/web-api/dist/response/UsersListResponse';
 
 function parseArgs(argv?: string[]) {
   try {
@@ -23,6 +28,7 @@ function parseArgs(argv?: string[]) {
         '--reactions': String,
         '--dry-run': Boolean,
         '--as-user': Boolean,
+        '--no-mention': Boolean,
         '--help': Boolean,
         '--debug': Boolean,
 
@@ -37,9 +43,17 @@ function parseArgs(argv?: string[]) {
     } else {
       Log.error(e);
     }
-    Log.error(aggregateReactionsHelpText);
+    Log.error(byEachMemberReactedHelpText);
     return null;
   }
+}
+
+interface MemberDictionary {
+  [id: string]: number;
+}
+
+interface ReactionDictionary {
+  [id: string]: MemberDictionary;
 }
 
 export const exec: CliExecFn = async (argv) => {
@@ -47,7 +61,7 @@ export const exec: CliExecFn = async (argv) => {
   if (args === null) return;
 
   if (args['--help']) {
-    Log.success(aggregateReactionsHelpText);
+    Log.success(byEachMemberReactedHelpText);
     return;
   }
   Log.setDebug(args['--debug']);
@@ -60,17 +74,6 @@ export const exec: CliExecFn = async (argv) => {
       : undefined,
     endDate: args['--end-date'] ? new Date(args['--end-date']) : undefined,
   };
-
-  if (!options.endDate) options.endDate = new Date();
-  if (!options.startDate) {
-    options.startDate = options.endDate;
-    options.startDate?.setMonth(options.endDate!.getMonth() - 1);
-  }
-
-  const targetReactions = args['--reactions']
-    ? args['--reactions'].split(',')
-    : ['to-be-oriented', 'feelspecial', 'simplify-x', 'simplify-x-2', 'www'];
-
   // dry-run でないなら投稿先チャンネルは必須
   let channel: Channel | undefined;
   if (!options.dryRun) {
@@ -83,6 +86,11 @@ export const exec: CliExecFn = async (argv) => {
     }
   }
 
+  const targetItems = (await aggregateUniqItemsReactedByMembers(argv)) || [];
+  const targetReactions = args['--reactions']
+    ? args['--reactions'].split(',')
+    : ['to-be-oriented', 'feelspecial', 'simplify-x', 'simplify-x-2', 'www'];
+
   const users = (await retrieveAllUser()).filter(
     (u) =>
       !u.is_bot &&
@@ -91,47 +99,68 @@ export const exec: CliExecFn = async (argv) => {
       !u.is_ultra_restricted &&
       !u.is_workflow_bot
   );
-
-  let items: Item[] = [];
-  for (const member of users) {
-    items.push(...(await getAllReactedItems({ user: member?.id }, options)));
+  const memberIds = users
+    .map(({ id }) => id)
+    .filter((id): id is string => typeof id == 'string');
+  // ここから実装
+  // uniq items からユーザー毎のターゲットリアクションを集計する
+  // 投稿者のIDと得られたリアクションの辞書
+  const skinToneRegex = /::skin-tone-\d/;
+  const reactionNameToReactedMemberDict: ReactionDictionary = {};
+  for (const reaction of targetReactions) {
+    reactionNameToReactedMemberDict[reaction] = {};
   }
-  Log.debug(`集計対象投稿数（重複含む）: ${items.length}`);
 
-  const reactionNameToCount = Object.entries(
-    aggregateReactionsForEachMember(items, users)
-  )
-    .flatMap(([memberId, rDict]) =>
-      Object.entries(rDict)
-        .filter(([reactionName]) => targetReactions.includes(reactionName))
-        .map(([reactionName, count]) => ({
-          key: reactionName,
-          memberId,
-          count,
-        }))
-    )
-    .reduce((acc, v) => {
-      const elm = { mid: v.memberId, count: v.count };
-      acc.set(v.key, acc.has(v.key) ? [...acc.get(v.key)!, elm] : [elm]);
-      return acc;
-    }, new Map<string, Array<{ mid: string; count: number }>>());
+  for (const item of targetItems) {
+    // 集計対象を整形
+    const reactions =
+      item.message?.reactions?.map((r) => ({
+        count: r.count || 0,
+        name: (r.name || '').replace(skinToneRegex, ''),
+        users: r.users || [],
+      })) || [];
+    // targetReaction を含まない投稿を弾く
+    if (!reactions.some((r) => targetReactions.includes(r.name))) continue;
 
+    for (const reaction of reactions) {
+      if (!targetReactions.includes(reaction.name)) continue;
+      const rDict = reactionNameToReactedMemberDict[reaction.name];
+      for (const user of reaction.users) {
+        // 自身の投稿へのリアクションなら集計しない
+        if (item.message?.user === user) continue;
+        rDict[user] = (rDict[user] ?? 0) + 1;
+      }
+    }
+  }
+
+  console.log(reactionNameToReactedMemberDict);
   const blocks: string[] = [];
-  const keys = [...reactionNameToCount.keys()];
-  for (const key of keys) {
-    // 同じ獲得数でまとめる
-    const candidates = groupBy(reactionNameToCount.get(key)!, (c) => c.count);
+  for (const [rid, dict] of Object.entries(
+    reactionNameToReactedMemberDict
+  ).sort(
+    (a, b) => targetReactions.indexOf(a[0]) - targetReactions.indexOf(b[0])
+  )) {
+    const candidates = groupBy(Object.entries(dict), ([mid, count]) => count);
     if (Object.keys(candidates).length === 0) {
-      blocks.push(`:${key}: を獲得した人はいませんでした。`);
+      blocks.push(`:${rid}: をリアクションした人はいませんでした。`);
       continue;
     }
+    console.log(rid, candidates);
     // 獲得数が一番多い順に 5位まで、もしくは同列順位を含めて 5人以上になるようにリストアップする
-    const list: { mid: string; count: number; rank: number }[] = [];
-    for (const c of Object.entries(candidates).reverse()) {
+    const list: { rid: string; mid: string; count: number; rank: number }[] =
+      [];
+    for (const [index, value] of Object.entries(candidates).reverse()) {
       if (list.length >= 5) break;
-      list.push(...c[1].map((m) => ({ ...m, rank: list.length + 1 })));
+      list.push(
+        ...Object.entries(value).map(([_, v]) => ({
+          rid,
+          mid: v[0],
+          count: v[1],
+          rank: list.length + 1,
+        }))
+      );
     }
-    const text = `最も :${key}: を獲得したトップ${
+    const text = `最も :${rid}: をリアクションしたトップ${
       list.length
     }は、この人たちです！\n${list
       .map(({ mid, count, rank }) => {
@@ -143,11 +172,6 @@ export const exec: CliExecFn = async (argv) => {
       .join('\n')}`;
     blocks.push(text);
   }
-  blocks.push(
-    ...targetReactions
-      .filter((r) => ![...keys].includes(r))
-      .map((r) => `:${r}: を獲得した人はいませんでした。`)
-  );
 
   if (args['--dry-run']) {
     Log.success(blocks);
@@ -160,7 +184,7 @@ export const exec: CliExecFn = async (argv) => {
         blocks: [
           `${options.startDate?.toLocaleDateString() ?? '未設定'}~${
             options.endDate?.toLocaleDateString() ?? '現在'
-          }の期間で最もリアクションを貰った人を表彰します🎉`,
+          }の期間で最もリアクションを行った人を発表します🎉`,
           ...blocks,
         ].flatMap((b) => [
           { type: 'divider' },

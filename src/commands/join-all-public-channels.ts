@@ -44,18 +44,32 @@ export const exec: CliExecFn = async (argv) => {
 
   const options: SlackDemoOptions = {
     dryRun: args['--dry-run'],
-    asBot: true,
   };
 
-  await getAllChannels({}, options).then((channels) => {
-    return channels
-      .filter(
-        (ch) =>
-          ch.is_channel && !ch.is_member && !ch.is_archived && !ch.is_private
-      )
-      .map((ch) =>
-        inviteToChannel({ channel: ch.id!, users: 'U03CB2YKVSQ' }, options)
-      );
-    // .map((ch) => joinChannel({ channel: ch.id! }, options))
+  // 1. Bot が未参加のチャンネル一覧を取得して
+  // 2. 自分がまず先にチャンネルにジョインして
+  // 3. Bot を招待する
+  //    本当は2で既にジョイン済みならスキップしていい
+  await getAllChannels({}, { ...options, asBot: true }).then((channels) => {
+    return (
+      channels
+        .filter(
+          (ch) =>
+            ch.is_channel &&
+            !ch.is_member &&
+            !ch.is_archived &&
+            !ch.is_private &&
+            !ch.is_org_shared &&
+            !ch.is_shared
+        )
+        // .forEach((ch) => console.log(ch));
+        .map(async (ch) => {
+          await joinChannel({ channel: ch.id! }, { ...options, asBot: false });
+          await inviteToChannel(
+            { channel: ch.id!, users: 'U03CB2YKVSQ' },
+            { ...options, asBot: false }
+          );
+        })
+    );
   });
 };
