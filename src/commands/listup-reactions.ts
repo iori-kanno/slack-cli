@@ -14,6 +14,7 @@ function parseArgs(argv?: string[]) {
         '--timestamp': String,
         '--channel': String,
         '--dry-run': Boolean,
+        '--as-user': Boolean,
         '--help': Boolean,
 
         // Alias
@@ -44,7 +45,7 @@ export const exec: CliExecFn = async (argv) => {
     return;
   }
   const options: SlackDemoOptions = {
-    asBot: false,
+    asBot: args['--as-user'] === undefined ? true : !args['--as-user'],
     dryRun: args['--dry-run'],
   };
   if (args['--url']) {
