@@ -1,10 +1,8 @@
 import arg from 'arg';
-import { invalidOptionText, listUpMembersHelpText } from '../lib/messages';
-import { CliExecFn, SlackDemoOptions } from '../types';
-import * as Log from '../lib/log';
-import { aggregateReactions } from '../api/reaction';
-import { parseSlackUrl } from '../lib/helper';
-import { getAllChannels } from '../api/slack/channel';
+import { invalidOptionText, listUpMembersHelpText } from '../../lib/messages';
+import { CliExecFn, SlackDemoOptions } from '../../types';
+import * as Log from '../../lib/log';
+import { getAllChannels } from '../../api/slack/channel';
 
 function parseArgs(argv?: string[]) {
   try {

@@ -1,12 +1,9 @@
 import { notifyNeedUpdateCLI } from '../lib/notify-update';
 import { CliExecFn } from '../types';
-import * as version from './version';
-import * as help from './help';
+import { help, version } from './help';
 import * as listUpReactions from './listup-reactions';
-import * as getLatestPosts from './get-latest-posts';
-import * as getReactionsForUser from './get-reactions-for-user';
-import * as aggregateReactions from './aggregate-reactions';
-import * as aggregateMembersReacted from './aggregate-members-reacted';
+import { getReactionsForUser, getLatestPosts } from './get';
+import { aggregateReactions, aggregateMembersReacted } from './aggregate';
 import * as joinAllPublicChannels from './join-all-public-channels';
 import * as Log from '../lib/log';
 import { commandListText } from '../lib/messages';

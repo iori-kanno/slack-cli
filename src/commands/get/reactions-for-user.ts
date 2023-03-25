@@ -1,15 +1,15 @@
 import arg from 'arg';
-import { invalidOptionText, listUpMembersHelpText } from '../lib/messages';
-import { CliExecFn, SlackDemoOptions } from '../types';
-import * as Log from '../lib/log';
+import { invalidOptionText, listUpMembersHelpText } from '../../lib/messages';
+import { CliExecFn, SlackDemoOptions } from '../../types';
+import * as Log from '../../lib/log';
 import {
   mapUserIdToMember,
   mapUserNameToMember,
   retrieveAllUser,
-} from '../api/user';
+} from '../../api/user';
 import { Member } from '@slack/web-api/dist/response/UsersListResponse';
-import { getAllReactedItems } from '../api/slack/reactions';
-import { aggregateReactionsForEachMember } from '../api/reaction';
+import { getAllReactedItems } from '../../api/slack/reactions';
+import { aggregateReactionsForEachMember } from '../../api/reaction';
 
 function parseArgs(argv?: string[]) {
   try {
