@@ -1,9 +1,9 @@
 import arg from 'arg';
 import { invalidOptionText, listUpMembersHelpText } from '../lib/messages';
-import { CliExecFn, SlackDemoOptions } from '../types';
+import { CliExecFn } from '../types';
 import * as Log from '../lib/log';
 import { aggregateReactions } from '../api/reaction';
-import { parseSlackUrl } from '../lib/helper';
+import { parseOptions, parseSlackUrl } from '../lib/parser';
 
 function parseArgs(argv?: string[]) {
   try {
@@ -44,10 +44,7 @@ export const exec: CliExecFn = async (argv) => {
     Log.success(listUpMembersHelpText);
     return;
   }
-  const options: SlackDemoOptions = {
-    asBot: args['--as-user'] === undefined ? true : !args['--as-user'],
-    dryRun: args['--dry-run'],
-  };
+  const options = parseOptions(args);
   if (args['--url']) {
     const { channel, ts } = parseSlackUrl(args['--url']);
     await aggregateReactions(channel, ts, options);

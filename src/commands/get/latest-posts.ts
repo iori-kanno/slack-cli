@@ -1,8 +1,9 @@
 import arg from 'arg';
 import { invalidOptionText, listUpMembersHelpText } from '../../lib/messages';
-import { CliExecFn, SlackDemoOptions } from '../../types';
+import { CliExecFn } from '../../types';
 import * as Log from '../../lib/log';
 import { getAllChannels } from '../../api/slack/channel';
+import { parseOptions } from '../../lib/parser';
 
 function parseArgs(argv?: string[]) {
   try {
@@ -40,10 +41,7 @@ export const exec: CliExecFn = async (argv) => {
     Log.success(listUpMembersHelpText);
     return;
   }
-  const options: SlackDemoOptions = {
-    asBot: false,
-    dryRun: args['--dry-run'],
-  };
+  const options = parseOptions(args);
   if (args['--channel-name']) {
     const channels = (await getAllChannels({ exclude_archived: false }))
       .filter((a) => !a.is_private)
