@@ -1,15 +1,19 @@
 import arg from 'arg';
-import { invalidOptionText, aggregateReactionsHelpText } from '../lib/messages';
-import { CliExecFn, SlackDemoOptions } from '../types';
-import * as Log from '../lib/log';
-import { retrieveAllUser } from '../api/user';
-import { getAllReactedItems } from '../api/slack/reactions';
-import { aggregateReactionsForEachMember } from '../api/reaction';
+import {
+  invalidOptionText,
+  aggregateReactionsHelpText,
+} from '../../lib/messages';
+import { CliExecFn } from '../../types';
+import * as Log from '../../lib/log';
+import { retrieveAllUser } from '../../api/user';
+import { getAllReactedItems } from '../../api/slack/reactions';
+import { aggregateReactionsForEachMember } from '../../api/reaction';
 import { Item } from '@slack/web-api/dist/response/ReactionsListResponse';
-import { postMessageToSlack } from '../api/slack/chat';
-import { getAllChannels } from '../api/slack/channel';
+import { postMessageToSlack } from '../../api/slack/chat';
+import { getAllChannels } from '../../api/slack/channel';
 import { Channel } from '@slack/web-api/dist/response/ChannelsListResponse';
 import groupBy from 'just-group-by';
+import { parseOptions } from '../../lib/parser';
 
 function parseArgs(argv?: string[]) {
   try {
@@ -51,15 +55,7 @@ export const exec: CliExecFn = async (argv) => {
     return;
   }
   Log.setDebug(args['--debug']);
-  const options: SlackDemoOptions = {
-    asBot: args['--as-user'] === undefined ? true : !args['--as-user'],
-    dryRun: args['--dry-run'],
-    noMention: args['--no-mention'],
-    startDate: args['--start-date']
-      ? new Date(args['--start-date'])
-      : undefined,
-    endDate: args['--end-date'] ? new Date(args['--end-date']) : undefined,
-  };
+  const options = parseOptions(args);
 
   if (!options.endDate) options.endDate = new Date();
   if (!options.startDate) {

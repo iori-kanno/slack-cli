@@ -1,15 +1,16 @@
 import arg from 'arg';
-import { invalidOptionText, listUpMembersHelpText } from '../lib/messages';
-import { CliExecFn, SlackDemoOptions } from '../types';
-import * as Log from '../lib/log';
+import { invalidOptionText, listUpMembersHelpText } from '../../lib/messages';
+import { CliExecFn } from '../../types';
+import * as Log from '../../lib/log';
 import {
   mapUserIdToMember,
   mapUserNameToMember,
   retrieveAllUser,
-} from '../api/user';
+} from '../../api/user';
 import { Member } from '@slack/web-api/dist/response/UsersListResponse';
-import { getAllReactedItems } from '../api/slack/reactions';
-import { aggregateReactionsForEachMember } from '../api/reaction';
+import { getAllReactedItems } from '../../api/slack/reactions';
+import { aggregateReactionsForEachMember } from '../../api/reaction';
+import { parseOptions } from '../../lib/parser';
 
 function parseArgs(argv?: string[]) {
   try {
@@ -49,10 +50,7 @@ export const exec: CliExecFn = async (argv) => {
     Log.success(listUpMembersHelpText);
     return;
   }
-  const options: SlackDemoOptions = {
-    asBot: false,
-    dryRun: args['--dry-run'],
-  };
+  const options = parseOptions(args);
 
   const start = args['--start-date']
     ? new Date(args['--start-date'])

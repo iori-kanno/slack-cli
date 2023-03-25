@@ -1,12 +1,13 @@
 import arg from 'arg';
-import { invalidOptionText, aggregateReactionsHelpText } from '../lib/messages';
-import { CliExecFn, SlackDemoOptions } from '../types';
+import { invalidOptionText } from '../lib/messages';
+import { CliExecFn } from '../types';
 import * as Log from '../lib/log';
 import {
   getAllChannels,
   inviteToChannel,
   joinChannel,
 } from '../api/slack/channel';
+import { parseOptions } from '../lib/parser';
 
 function parseArgs(argv?: string[]) {
   try {
@@ -42,9 +43,7 @@ export const exec: CliExecFn = async (argv) => {
     return;
   }
 
-  const options: SlackDemoOptions = {
-    dryRun: args['--dry-run'],
-  };
+  const options = parseOptions(args);
 
   // 1. Bot が未参加のチャンネル一覧を取得して
   // 2. 自分がまず先にチャンネルにジョインして
