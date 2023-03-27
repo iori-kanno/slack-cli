@@ -1493,6 +1493,11 @@ just-group-by@2.2.0:
   resolved "https://registry.yarnpkg.com/just-group-by/-/just-group-by-2.2.0.tgz#814be9b4ab55b1bed07c3df6587b7fbbfe0f9c9c"
   integrity sha512-brZocDSmkvDYc+FOr07GiTar4cp7K6OB9huVOrj5LX+iXfCe3hTvn2KGM811LE/SBQkCzuYDDEcG8HA/dKDrnw==
 
+just-order-by@1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/just-order-by/-/just-order-by-1.0.0.tgz#81e13ea43462f5956087a8bedae88fe1f54b2463"
+  integrity sha512-m83kcBMoX43jRLDzR6J7NzIpEEpMmMmh0xwVSMKpXObIFh6ejxpQ02HXc9gCq5cFWHbL5gZ3yRHRGYgMGpoUnA==
+
 kind-of@^6.0.2:
   version "6.0.3"
   resolved "https://registry.yarnpkg.com/kind-of/-/kind-of-6.0.3.tgz#07c05034a6c349fa06e24fa35aa76db4580ce4dd"

@@ -2,7 +2,12 @@ import { notifyNeedUpdateCLI } from '../lib/notify-update';
 import { CliExecFn } from '../types';
 import { help, version } from './help';
 import * as listUpReactions from './listup-reactions';
-import { getReactionsForUser, getLatestPosts } from './get';
+import {
+  getReactionsForUser,
+  getLatestPosts,
+  getMembers,
+  getChannels,
+} from './get';
 import { aggregateReactions, aggregateMembersReacted } from './aggregate';
 import * as joinAllPublicChannels from './join-all-public-channels';
 import * as Log from '../lib/log';
@@ -20,6 +25,8 @@ export async function exec(
     'listup:reactions': async () => listUpReactions.exec(),
     'get:posts': async () => getLatestPosts.exec(),
     'get:reactions': async () => getReactionsForUser.exec(),
+    'get:members': async () => getMembers.exec(),
+    'get:channels': async () => getChannels.exec(),
     'aggregate:reactions': async () => aggregateReactions.exec(),
     'aggregate:members-reacted': async () => aggregateMembersReacted.exec(),
     'join:public-channels': async () => joinAllPublicChannels.exec(),
