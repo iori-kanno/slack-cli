@@ -7,10 +7,13 @@ import { postMessageToSlack } from '../../api/slack/chat';
 import { parseOptions } from '../../lib/parser';
 import { summarizeUser } from '../../api/gpt/summarize/user';
 import { retrieveInfoForArgs } from '../../lib/arguments';
+import { validate } from '../../api/gpt';
 
 const summarizeHelpText = `
 Command:
   slack-cli summarize:member  指定されたチャンネルxユーザーの直近の投稿をGPTで要約する
+  * 環境変数に OPENAI_API_KEY, OPENAI_API_BASE の設定が必要。
+  * このコマンドは、チャンネルの投稿を全て取得してから要約を行うため、取得する投稿数が多い場合は時間がかかる。
 
 Usage:
   slack-cli summarize:member --channel-name aaa --member-id bbb [options]
@@ -18,7 +21,7 @@ Usage:
 Options:
   --channel-id        集計対象チャンネルID。--channel-id or --channel-name が必須。
   --channel-name      集計対象チャンネル名。--channel-id or --channel-name が必須。
-  --member-id, -u     メンバーのID。user-id or user-fuzzy-name が必須
+  --member-id         メンバーのID。member-id or member-fuzzy-name が必須。
   --member-fuzzy-name メンバーのアカウント名。完全一致である必要はないが、複数当てはまる場合は最初にヒットしたユーザーにマッピングされるので注意。
   --limit             取得する投稿数（チャンネルの最新投稿を limit 件ずつ取得して対象ユーザーの投稿が limit 件になるまで取得する。スレッドの投稿を取得する都合上大幅に超えてしまうこともある）
   --as-user           BOT のトークンを利用せず、ユーザートークンを利用してリクエストを行う。デフォルト false
@@ -68,6 +71,7 @@ export const exec: CliExecFn = async (argv) => {
     return;
   }
   const options = parseOptions(args);
+  if (!validate()) return;
 
   const { channel, member: user } = await retrieveInfoForArgs({
     channelId: args['--channel-id'],

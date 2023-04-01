@@ -5,7 +5,7 @@ import * as Log from '../lib/log';
 import { aggregateReactions } from '../api/reaction';
 import { parseOptions, parseSlackUrl } from '../lib/parser';
 
-const listUpMembersHelpText = `
+const helpText = `
 Command:
   slack-cli listup:reactions  指定された投稿に付いているリアクションを集計してスレッドに投稿する
 
@@ -47,7 +47,7 @@ function parseArgs(argv?: string[]) {
     } else {
       Log.error(e);
     }
-    Log.warn(listUpMembersHelpText);
+    Log.warn(helpText);
     return null;
   }
 }
@@ -57,7 +57,7 @@ export const exec: CliExecFn = async (argv) => {
   if (args === null) return;
 
   if (args['--help']) {
-    Log.success(listUpMembersHelpText);
+    Log.success(helpText);
     return;
   }
   const options = parseOptions(args);

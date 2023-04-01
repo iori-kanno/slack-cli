@@ -11,13 +11,15 @@ https://api.slack.com/ にて作成して設定してください。
 
 また、必要に応じて `SLACK_TEAM_ID` も設定することができます。
 
-| 環境変数名      | 必須 | 用途                                                                       |
-| :-------------- | :--: | :------------------------------------------------------------------------- |
-| SLACK_BOT_TOKEN |  ⭕  | ボットトークン。Slack API を利用するために必須。                           |
-| SLACK_TOKEN     |  ⭕  | ユーザートークン。Slack API をユーザーとして利用する際に利用。             |
-| SLACK_TEAM_ID   |  ❌  | Slack の team_id。設定したトークンが複数チームに所属している場合指定する。 |
-| OPENAI_API_KEY  |  ❌  | summarize 関連のコマンドを使用する際に必須。                               |
-| OPENAI_API_BASE |  ❌  | sumamrize 関連のコマンドを使用する際に必須。                               |
+| 環境変数名         | 必須 | 用途                                                                       |
+| :----------------- | :--: | :------------------------------------------------------------------------- |
+| SLACK_BOT_TOKEN    |  ⭕  | ボットトークン。Slack API を利用するために必須。                           |
+| SLACK_TOKEN        |  ⭕  | ユーザートークン。Slack API をユーザーとして利用する際に利用。             |
+| SLACK_TEAM_ID      |  ❌  | Slack の team_id。設定したトークンが複数チームに所属している場合指定する。 |
+| OPENAI_API_KEY     |  ❌  | OpenAI の apiKey。summarize 関連のコマンドを使用する際に必須。             |
+| OPENAI_API_BASE    |  ❌  | OpenAI の basePath。sumamrize 関連のコマンドを使用する際に必須。           |
+| OPENAI_MODEL       |  ❌  | OpenAI の model。デフォルトは 'text-davinci-003'                           |
+| OPENAI_API_VERSION |  ❌  | OpenAI の api-version。デフォルトは '2022-12-01'                           |
 
 現状 SLACK_TOKEN も必須となってしまっているのでユーザートークンを使わない場合は SLACK_BOT_TOKEN と同じものを設定してください。
 
@@ -61,7 +63,7 @@ slack-cli aggregate:members-reacted --help
 # => aggregate:members-reacted コマンドのヘルプを表示
 
 slack-cli aggregate:members-reacted --start-date 2023-03-28 --reactions "www,+1" --channel-name general
-# => 2023年3月28日以降の投稿に :www:, :+1: を行ったユーザーを修正してトップ5を #general チャンネルへと投稿する。
+# => 2023年3月28日以降の投稿に :www:, :+1: を行ったユーザーを集計してトップ5を #general チャンネルへと投稿する。
 
 ```
 

@@ -25,6 +25,7 @@ Options:
   --start-date      集計対象の期間の開始日時。指定例: '2022-12-01T00:00:00'
   --end-date        集計対象の期間の終了日時。指定例: '2022-12-01T00:00:00'
   --reactions       集計対象のリアクション文字列。カンマ区切りで指定する。デフォルト '+1,pray'
+  --no-mention      投稿時にメンションしない場合にのみ指定する
   --dry-run         投稿はせずに投稿内容をログ出力する
   --as-user         BOT のトークンを利用せず、ユーザートークンを利用してリクエストを行う。デフォルト false
   --debug           指定した場合デバッグログを出力する
@@ -41,6 +42,7 @@ function parseArgs(argv?: string[]) {
         '--start-date': String,
         '--end-date': String,
         '--reactions': String,
+        '--no-mention': Boolean,
         '--dry-run': Boolean,
         '--as-user': Boolean,
         '--debug': Boolean,

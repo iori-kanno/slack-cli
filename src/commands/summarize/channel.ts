@@ -8,10 +8,13 @@ import { parseOptions } from '../../lib/parser';
 import { retrieveInfoForArgs } from '../../lib/arguments';
 import { summarizeChannel } from '../../api/gpt/summarize/channel';
 import { replaceMemberIdToNameInTexts } from '../../lib/helper';
+import { validate } from '../../api/gpt';
 
 const summarizeHelpText = `
 Command:
   slack-cli summarize:channel    指定されたチャンネルの直近の投稿をGPTで要約する
+  * 環境変数に OPENAI_API_KEY, OPENAI_API_BASE の設定が必要。
+  * このコマンドは、チャンネルの投稿を全て取得してから要約を行うため、取得する投稿数が多い場合は時間がかかる。
 
 Usage:
   slack-cli summarize:channel --channel-name aaa [options]
@@ -64,6 +67,7 @@ export const exec: CliExecFn = async (argv) => {
     return;
   }
   const options = parseOptions(args);
+  if (!validate()) return;
 
   const { channel } = await retrieveInfoForArgs({
     channelId: args['--channel-id'],

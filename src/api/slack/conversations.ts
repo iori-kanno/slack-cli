@@ -46,13 +46,16 @@ export const getAllConversations = async (
   memberIdsPosted?: string[],
   options?: SlackDemoOptions
 ): Promise<Message[]> => {
+  Log.debug(
+    `start to fetch slack posts and threads from a channel (limit: ${convLimit})`
+  );
   const messages = Array<Message>();
   let cursor: string | undefined;
   do {
-    Log.debug(`cursor: ${cursor}, args: ${JSON.stringify(args)}`);
+    Log.debug(`\t\tcursor: ${cursor}, args: ${JSON.stringify(args)}`);
     const res = await getHistoriesList({ ...args, cursor }, options);
     Log.debug(
-      `item count: ${res.messages?.length} (thread: ${
+      `\t\titem count: ${res.messages?.length} (thread: ${
         res.messages?.filter((m) => m.thread_ts).length
       })`
     );
