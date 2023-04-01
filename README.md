@@ -33,20 +33,20 @@ https://api.slack.com/ にて作成して設定してください。
 
 `slack-cli --help` にて一覧を確認できます。
 
-| コマンド名                                                | 概要                                                                                                                 |
-| :-------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------- |
-| [aggregate:reactions](#aggregate%3Areactions)             | 指定された期間内に指定されたリアクション数が多いユーザーを最大 5 名リストアップする                                  |
-| [aggregate:members-reacted](#aggregate%3Amembers-reacted) | 指定された期間内に指定されたリアクションを最も行ったユーザー最大 5 名をリストアップする                              |
-| [listup:reactions](#listup%3Areactions)                   | 指定された投稿に付いているリアクションを集計してスレッドに投稿します                                                 |
-| [get:channels](#get%3Achannels)                           | チャンネル一覧を出力する。オプションで各種フィルターやソートが使える                                                 |
-| [get:members](#get%3Amembers)                             | Slack に参加しているメンバー一覧を出力する。チャンネルを指定するとそのチャンネルに参加しているメンバーのみを出力する |
-| [summarize:channel](#summarize%3Achannel)                 | 指定されたチャンネルの直近の投稿を GPT で要約する                                                                    |
-| [summarize:member](#summarize%3Amember)                   | 指定されたチャンネル x メンバーの直近の投稿を GPT で要約する                                                         |
-| [join:public-channels](#join%3Apublic-channels)           | BOT を全てのパブリックチャンネルに参加させる。ユーザートークンが必須                                                 |
-| [--version, -v](#version)                                 | バージョンを表示する                                                                                                 |
-| [--help, -h](#help)                                       | ヘルプを表示する                                                                                                     |
+| コマンド名                                              | 概要                                                                                                                 |
+| :------------------------------------------------------ | :------------------------------------------------------------------------------------------------------------------- |
+| [aggregate:reactions](#aggregate-reactions)             | 指定された期間内に指定されたリアクション数が多いユーザーを最大 5 名リストアップする                                  |
+| [aggregate:members-reacted](#aggregate-members-reacted) | 指定された期間内に指定されたリアクションを最も行ったユーザー最大 5 名をリストアップする                              |
+| [listup:reactions](#listup-reactions)                   | 指定された投稿に付いているリアクションを集計してスレッドに投稿します                                                 |
+| [get:channels](#get-channels)                           | チャンネル一覧を出力する。オプションで各種フィルターやソートが使える                                                 |
+| [get:members](#get-members)                             | Slack に参加しているメンバー一覧を出力する。チャンネルを指定するとそのチャンネルに参加しているメンバーのみを出力する |
+| [summarize:channel](#summarize-channel)                 | 指定されたチャンネルの直近の投稿を GPT で要約する                                                                    |
+| [summarize:member](#summarize-member)                   | 指定されたチャンネル x メンバーの直近の投稿を GPT で要約する                                                         |
+| [join:public-channels](#join-public-channels)           | BOT を全てのパブリックチャンネルに参加させる。ユーザートークンが必須                                                 |
+| [--version, -v](#version)                               | バージョンを表示する                                                                                                 |
+| [--help, -h](#help)                                     | ヘルプを表示する                                                                                                     |
 
-### aggregate%3Areactions
+### aggregate-reactions
 
 ```
 slack-cli aggregate:reactions --help
@@ -56,7 +56,7 @@ slack-cli aggregate:reactions --start-date '2022-12-01T00:00:00' --end-date '202
 # => 指定期間内の投稿に対して :stamp-name:, :ok:, :+1: が押された投稿を行ったユーザー毎に集計してトップ5を #hogehoge チャンネルへと投稿する
 ```
 
-### aggregate%3Amembers-reacted
+### aggregate-members-reacted
 
 ```
 slack-cli aggregate:members-reacted --help
@@ -67,7 +67,7 @@ slack-cli aggregate:members-reacted --start-date 2023-03-28 --reactions "www,+1"
 
 ```
 
-### listup%3Areactions
+### listup-reactions
 
 ```
 slack-cli listup:reactions --help
@@ -77,7 +77,7 @@ slack-cli listup:reactions -u https://xxxx.slack.com/archives/XXXXX/p16727246382
 # => url で指定された投稿に対してその投稿スレッドにリアクションの集計結果を投稿する
 ```
 
-### get%3Achannels
+### get-channels
 
 ```
 slack-cli get:channels --help
@@ -87,7 +87,7 @@ slack-cli get:channels --filter-prefix hoge --excludes "dev,test"
 # => チャンネル名の先頭に hoge が付いて、dev と test という文字列を含まないチャンネル一覧を表示する
 ```
 
-### get%3Amembers
+### get-members
 
 ```
 slack-cli get:members --help
@@ -97,7 +97,7 @@ slack-cli get:members --channel-name slack-test
 # => #slack-test チャンネルに参加しているメンバーの一覧を表示する
 ```
 
-### summarize%3Achannel
+### summarize-channel
 
 ```
 slack-cli summarize:channel --help
@@ -107,7 +107,7 @@ slack-cli summarize:channel --channel-name slack-test --limit 200
 # => #slack-test チャンネルの直近200件の投稿を取得して要約する
 ```
 
-### summarize%3Amember
+### summarize-member
 
 ```
 slack-cli summarize:member --help
@@ -117,7 +117,7 @@ slack-cli summarize:member --channel-name slack-test --member-id xxx --limit 200
 # => #slack-test チャンネルの指定したメンバーの直近200件の投稿を取得して要約する
 ```
 
-### join%3Apublic-channels
+### join-public-channels
 
 ```
 slack-cli join:public-channels --help
