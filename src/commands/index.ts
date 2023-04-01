@@ -10,6 +10,7 @@ import {
 } from './get';
 import { aggregateReactions, aggregateMembersReacted } from './aggregate';
 import * as joinAllPublicChannels from './join-all-public-channels';
+import { summarizeChannel, summarizeUser } from './summarize';
 import * as Log from '../lib/log';
 import { commandListText } from '../lib/messages';
 
@@ -30,6 +31,8 @@ export async function exec(
     'aggregate:reactions': async () => aggregateReactions.exec(),
     'aggregate:members-reacted': async () => aggregateMembersReacted.exec(),
     'join:public-channels': async () => joinAllPublicChannels.exec(),
+    'summarize:user': async () => summarizeUser.exec(),
+    'summarize:channel': async () => summarizeChannel.exec(),
     '--help': async () => help.exec(),
     '-h': async () => help.exec(),
     '--version': async () => version.exec(),

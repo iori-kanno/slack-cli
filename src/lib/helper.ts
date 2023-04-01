@@ -1,5 +1,8 @@
 // import pkg from '../../package.json';
+import { Message } from '@slack/web-api/dist/response/ChannelsHistoryResponse';
 import dayjs from 'dayjs';
+import { retrieveAllUser } from '../api/user';
+import { SlackDemoOptions } from '../types';
 
 export function getCurrentCliVersion() {
   return '0.1.0';
@@ -42,4 +45,22 @@ export const isWithinByDate = (
   const startDate = start ?? new Date(1970, 0, 0);
   const endDate = end ?? new Date(2100, 0, 0);
   return dayjs(endDate).diff(target) >= 0 && dayjs(startDate).diff(target) <= 0;
+};
+
+export const replaceMemberIdToNameInTexts = async (
+  texts: string[],
+  options?: SlackDemoOptions
+) => {
+  const members = (await retrieveAllUser(options))
+    .filter((m) => m.id)
+    .map((m) => ({ regexp: new RegExp(m.id!, 'g'), name: m.name }));
+
+  return texts.map((t) => {
+    let text = t;
+    for (const member of members) {
+      if (!member.name) continue;
+      text = text.replace(member.regexp, member.name);
+    }
+    return text;
+  });
 };
