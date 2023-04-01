@@ -70,7 +70,6 @@ export const exec: CliExecFn = async (argv) => {
     Log.success(aggregateReactionsHelpText);
     return;
   }
-  Log.setDebug(args['--debug']);
   const options = parseOptions(args);
 
   if (!options.endDate) options.endDate = new Date();

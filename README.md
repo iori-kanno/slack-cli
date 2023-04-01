@@ -81,7 +81,7 @@ slack-cli listup:reactions -u https://xxxx.slack.com/archives/XXXXX/p16727246382
 slack-cli get:channels --help
 # => get:channels コマンドのヘルプを表示
 
-slack-cli get:channels --prefix hoge --excludes "dev,test"
+slack-cli get:channels --filter-prefix hoge --excludes "dev,test"
 # => チャンネル名の先頭に hoge が付いて、dev と test という文字列を含まないチャンネル一覧を表示する
 ```
 

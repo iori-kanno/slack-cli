@@ -67,7 +67,6 @@ export const exec: CliExecFn = async (argv) => {
     Log.success(summarizeHelpText);
     return;
   }
-  Log.setDebug(args['--debug']);
   const options = parseOptions(args);
 
   const { channel, member: user } = await retrieveInfoForArgs({

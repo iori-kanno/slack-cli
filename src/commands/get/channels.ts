@@ -97,7 +97,6 @@ export const exec: CliExecFn = async (argv) => {
   const maxMembers = args['--max-members'];
   const minMembers = args['--min-members'];
 
-  Log.setDebug(args['--debug']);
   const options = parseOptions(args);
 
   const channels = (

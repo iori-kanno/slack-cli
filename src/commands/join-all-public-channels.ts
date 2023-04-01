@@ -8,6 +8,7 @@ import {
   joinChannel,
 } from '../api/slack/channel';
 import { parseOptions } from '../lib/parser';
+import { fetchMe } from '../api/slack/auth';
 
 const helpText = `
 Command:
@@ -19,7 +20,7 @@ Usage:
 Options:
   --help, -h        このヘルプを表示
   --debug           デバッグモードで実行する
-  --dry-run         処理はせずに投稿内容をログ出力する
+  --dry-run         処理はせずに新規参加するチャンネルをログ出力する
 `;
 
 function parseArgs(argv?: string[]) {
@@ -57,31 +58,40 @@ export const exec: CliExecFn = async (argv) => {
   }
 
   const options = parseOptions(args);
+  const botUserId = await fetchMe({}, { ...options, asBot: true }).then(
+    (res) => res.user_id
+  );
+
+  if (!botUserId) {
+    Log.error('BOT の情報の取得に失敗しました');
+    return;
+  }
 
   // 1. Bot が未参加のチャンネル一覧を取得して
   // 2. 自分がまず先にチャンネルにジョインして
   // 3. Bot を招待する
   //    本当は2で既にジョイン済みならスキップしていい
   await getAllChannels({}, { ...options, asBot: true }).then((channels) => {
-    return (
-      channels
-        .filter(
-          (ch) =>
-            ch.is_channel &&
-            !ch.is_member &&
-            !ch.is_archived &&
-            !ch.is_private &&
-            !ch.is_org_shared &&
-            !ch.is_shared
-        )
-        // .forEach((ch) => console.log(ch));
-        .map(async (ch) => {
-          await joinChannel({ channel: ch.id! }, { ...options, asBot: false });
-          await inviteToChannel(
-            { channel: ch.id!, users: 'U03CB2YKVSQ' },
-            { ...options, asBot: false }
-          );
-        })
-    );
+    return channels
+      .filter(
+        (ch) =>
+          ch.is_channel &&
+          !ch.is_member &&
+          !ch.is_archived &&
+          !ch.is_private &&
+          !ch.is_org_shared &&
+          !ch.is_shared
+      )
+      .map((ch) => {
+        Log.debug(`Joining to #${ch.name} (${ch.id})...`);
+        return ch;
+      })
+      .map(async (ch) => {
+        await joinChannel({ channel: ch.id! }, { ...options, asBot: false });
+        await inviteToChannel(
+          { channel: ch.id!, users: botUserId },
+          { ...options, asBot: false }
+        );
+      });
   });
 };

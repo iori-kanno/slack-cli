@@ -78,7 +78,6 @@ export const exec: CliExecFn = async (argv) => {
     Log.success(byEachMemberReactedHelpText);
     return;
   }
-  Log.setDebug(args['--debug']);
   const options = parseOptions(args);
   // dry-run でないなら投稿先チャンネルは必須
   let channel: Channel | undefined;
