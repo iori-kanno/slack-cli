@@ -1,9 +1,25 @@
 import arg from 'arg';
-import { invalidOptionText, listUpMembersHelpText } from '../lib/messages';
+import { invalidOptionText } from '../lib/messages';
 import { CliExecFn } from '../types';
 import * as Log from '../lib/log';
 import { aggregateReactions } from '../api/reaction';
 import { parseOptions, parseSlackUrl } from '../lib/parser';
+
+const helpText = `
+Command:
+  slack-cli listup:reactions  指定された投稿に付いているリアクションを集計してスレッドに投稿する
+
+Usage:
+  slack-cli listup:reactions -url slack-url [options]
+
+Options:
+  --url, -u         指定したい投稿の slack url
+  --timestamp, -t   指定したい投稿のタイムスタンプ。url の代わりに指定することができる。-c 必須。
+  --channel, -c     指定したい投稿があるチャンネル。url の代わりに指定することができる。-t 必須。
+  --as-user         BOT のトークンを利用せず、ユーザートークンを利用してリクエストを行う。デフォルト false
+  --dry-run         投稿はせずに投稿内容をログ出力する
+  --help, -h        このヘルプを表示
+`;
 
 function parseArgs(argv?: string[]) {
   try {
@@ -13,8 +29,8 @@ function parseArgs(argv?: string[]) {
         '--url': String,
         '--timestamp': String,
         '--channel': String,
-        '--dry-run': Boolean,
         '--as-user': Boolean,
+        '--dry-run': Boolean,
         '--help': Boolean,
 
         // Alias
@@ -31,7 +47,7 @@ function parseArgs(argv?: string[]) {
     } else {
       Log.error(e);
     }
-    Log.warn(listUpMembersHelpText);
+    Log.warn(helpText);
     return null;
   }
 }
@@ -41,7 +57,7 @@ export const exec: CliExecFn = async (argv) => {
   if (args === null) return;
 
   if (args['--help']) {
-    Log.success(listUpMembersHelpText);
+    Log.success(helpText);
     return;
   }
   const options = parseOptions(args);

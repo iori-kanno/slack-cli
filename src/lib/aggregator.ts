@@ -1,12 +1,10 @@
-import { Channel } from '@slack/web-api/dist/response/ChannelsListResponse';
 import { Item } from '@slack/web-api/dist/response/ReactionsListResponse';
 import arg from 'arg';
 import * as Log from './log';
-import { getAllChannels } from '../api/slack/channel';
 import { getAllReactedItems } from '../api/slack/reactions';
 import { retrieveAllUser } from '../api/user';
-import { CliExecFn, SlackDemoOptions } from '../types';
-import { aggregateReactionsHelpText, invalidOptionText } from './messages';
+import { invalidOptionText } from './messages';
+import { parseOptions } from './parser';
 
 function parseArgs(argv?: string[]) {
   try {
@@ -31,7 +29,7 @@ function parseArgs(argv?: string[]) {
     } else {
       Log.error(e);
     }
-    Log.error(aggregateReactionsHelpText);
+    Log.error('TODO');
     return null;
   }
 }
@@ -40,16 +38,7 @@ export const aggregateUniqItemsReactedByMembers = async (argv) => {
   const args = parseArgs(argv);
   if (args === null) return;
 
-  Log.setDebug(args['--debug']);
-  const options: SlackDemoOptions = {
-    asBot: args['--as-user'] === undefined ? true : !args['--as-user'],
-    dryRun: args['--dry-run'],
-    startDate: args['--start-date']
-      ? new Date(args['--start-date'])
-      : undefined,
-    endDate: args['--end-date'] ? new Date(args['--end-date']) : undefined,
-  };
-
+  const options = parseOptions(args);
   if (!options.endDate) options.endDate = new Date();
   if (!options.startDate) {
     options.startDate = options.endDate;

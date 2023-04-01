@@ -1,11 +1,15 @@
 import { SlackDemoOptions } from '../../types';
 import { getChannelsList } from './conversations';
 import {
+  ConversationsInfoArguments,
+  ConversationsInfoResponse,
   ConversationsInviteArguments,
   ConversationsInviteResponse,
   ConversationsJoinArguments,
   ConversationsJoinResponse,
   ConversationsListArguments,
+  ConversationsMembersArguments,
+  ConversationsMembersResponse,
 } from '@slack/web-api';
 import { Channel } from '@slack/web-api/dist/response/ChannelsListResponse';
 import * as Log from '../../lib/log';
@@ -53,4 +57,20 @@ export const inviteToChannel = async (
   );
   if (options?.asBot) return botClient.conversations.invite(args);
   return userClient.conversations.invite(args);
+};
+
+export const showChannelInfo = async (
+  args: ConversationsInfoArguments,
+  options?: SlackDemoOptions
+): Promise<ConversationsInfoResponse> => {
+  if (options?.asBot) return botClient.conversations.info(args);
+  return userClient.conversations.info(args);
+};
+
+export const showMembersInChannel = async (
+  args: ConversationsMembersArguments,
+  options?: SlackDemoOptions
+): Promise<ConversationsMembersResponse> => {
+  if (options?.asBot) return botClient.conversations.members(args);
+  return userClient.conversations.members(args);
 };

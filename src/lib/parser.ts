@@ -3,6 +3,7 @@ import { SlackDemoOptions } from '../types';
 import * as Log from './log';
 
 export const parseOptions = (args: arg.Result<any>) => {
+  Log.setDebug(args['--debug']);
   return {
     asBot: args['--as-user'] === undefined ? true : !args['--as-user'],
     dryRun: args['--dry-run'],
