@@ -1,5 +1,5 @@
 import arg from 'arg';
-import { invalidOptionText, listUpMembersHelpText } from '../../lib/messages';
+import { invalidOptionText } from '../../lib/messages';
 import { CliExecFn } from '../../types';
 import * as Log from '../../lib/log';
 import {
@@ -12,13 +12,15 @@ import { getAllReactedItems } from '../../api/slack/reactions';
 import { aggregateReactionsForEachMember } from '../../api/reaction';
 import { parseOptions } from '../../lib/parser';
 
+const helpText = `TODO: help text`;
+
 function parseArgs(argv?: string[]) {
   try {
     return arg(
       {
         // Types
-        '--user-id': String,
-        '--user-name': String,
+        '--member-id': String,
+        '--member-fuzzy-name': String,
         '--start-date': String,
         '--end-date': String,
         '--dry-run': Boolean,
@@ -26,8 +28,6 @@ function parseArgs(argv?: string[]) {
 
         // Alias
         '-h': '--help',
-        '-uid': '--user-id',
-        '-uname': '--user-name',
       },
       { argv }
     );
@@ -37,7 +37,7 @@ function parseArgs(argv?: string[]) {
     } else {
       Log.error(e);
     }
-    Log.warn(listUpMembersHelpText);
+    Log.warn(helpText);
     return null;
   }
 }
@@ -47,7 +47,7 @@ export const exec: CliExecFn = async (argv) => {
   if (args === null) return;
 
   if (args['--help']) {
-    Log.success(listUpMembersHelpText);
+    Log.success(helpText);
     return;
   }
   const options = parseOptions(args);
@@ -60,12 +60,12 @@ export const exec: CliExecFn = async (argv) => {
     : new Date('2022-12-31T00:00:00');
 
   let member: Member | undefined;
-  if (args['--user-name']) {
-    member = await mapUserNameToMember(args['--user-name']);
-  } else if (args['--user-id']) {
-    member = await mapUserIdToMember(args['--user-id']);
+  if (args['--member-fuzzy-name']) {
+    member = await mapUserNameToMember(args['--member-fuzzy-name']);
+  } else if (args['--member-id']) {
+    member = await mapUserIdToMember(args['--member-id']);
   } else {
-    Log.error('--user-id または --user-name を指定してください。');
+    Log.error('--member-id または --member-fuzzy-name を指定してください。');
     return;
   }
 

@@ -1,11 +1,27 @@
 import arg from 'arg';
-import { invalidOptionText, listUpMembersHelpText } from '../../lib/messages';
+import { invalidOptionText } from '../../lib/messages';
 import { CliExecFn } from '../../types';
 import * as Log from '../../lib/log';
 import { getAllChannels, showMembersInChannel } from '../../api/slack/channel';
 import { parseOptions } from '../../lib/parser';
 import { retrieveAllUser } from '../../api/user';
+import { retrieveInfoForArgs } from '../../lib/arguments';
 import { Member } from '@slack/web-api/dist/response/UsersListResponse';
+
+const getMembersHelpText = `
+Command:
+  slack-cli get:members  Slackに参加しているメンバー一覧を出力する。チャンネルを指定するとそのチャンネルに参加しているメンバーのみを出力する。
+
+Usage:
+  slack-cli get:members [options]
+
+Options:
+  --channel-id      投稿先チャンネルID
+  --channel-name    投稿先チャンネル名
+  --debug           指定した場合デバッグログを出力する
+  --help, -h        このヘルプを表示
+  TODO: 指定したチャンネルに投稿できるようにする
+`;
 
 function parseArgs(argv?: string[]) {
   try {
@@ -28,7 +44,7 @@ function parseArgs(argv?: string[]) {
     } else {
       Log.error(e);
     }
-    Log.error('TODO');
+    Log.error(getMembersHelpText);
     return null;
   }
 }
@@ -38,62 +54,32 @@ export const exec: CliExecFn = async (argv) => {
   if (args === null) return;
 
   if (args['--help']) {
-    Log.success('TODO');
+    Log.success(getMembersHelpText);
     return;
   }
   Log.setDebug(args['--debug']);
   const options = parseOptions(args);
-  if (args['--channel-name']) {
-    const channels = (
-      await getAllChannels({ exclude_archived: false }, options)
-    )
-      .filter((a) => !a.is_private)
-      .sort((a, b) =>
-        (a.name ?? '' + a.id).toString().toLowerCase() >
-        (b.name ?? '' + b.id).toString().toLowerCase()
-          ? 1
-          : -1
-      );
-    Log.debug(
-      `パブリックチャンネル一覧（${channels.length}）\n`,
-      channels
-        .map(
-          (c) => c.id + ': ' + c.name + `${c.is_archived ? ' (archived)' : ''}`
-        )
-        .join('\n'),
-      '\n\n'
-    );
-    const channelName = channels.find((c) => c.name === args['--channel-name']);
-    if (!channelName) {
-      Log.error(
-        '--channel-name に指定されたチャンネル名が見つかりませんでした。'
-      );
-      return;
-    }
-  }
 
-  const targetChannel = (
-    await getAllChannels({ exclude_archived: false }, options)
-  ).find(
-    (c) => c.id === args['--channel-id'] || c.name === args['--channel-name']
-  );
+  const { channel } = await retrieveInfoForArgs({
+    channelId: args['--channel-id'],
+    channelName: args['--channel-name'],
+    options,
+  });
+
   const allMembers = await retrieveAllUser(options);
   const members = Array<Member>();
-  if (targetChannel) {
-    const info = await showMembersInChannel(
-      { channel: targetChannel.id! },
-      options
-    );
+  if (channel) {
+    const info = await showMembersInChannel({ channel: channel.id! }, options);
     Log.debug(info);
     members.push(...allMembers.filter((m) => info.members?.includes(m.id!)));
   } else {
     members.push(...allMembers);
   }
 
-  const text = `${
-    targetChannel ? '#' + targetChannel.name : ''
-  } メンバー一覧\n${members
-    .map((m) => `${m.id}: ${m.real_name ?? m.name}`)
+  const text = `${channel ? '#' + channel.name : ''} メンバー一覧 (${
+    members.length
+  }, 内 BOT ${members.filter((m) => m.is_bot).length})\n${members
+    .map((m) => `${m.id}: ${m.real_name ?? m.name}${m.is_bot ? ' (BOT)' : ''}`)
     .join('\n')}`;
 
   Log.success(text);

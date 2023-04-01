@@ -10,21 +10,21 @@ import { retrieveInfoForArgs } from '../../lib/arguments';
 
 const summarizeHelpText = `
 Command:
-  slack-cli summarize:user    指定されたチャンネルxユーザーの直近の投稿をGPTで要約する
+  slack-cli summarize:member  指定されたチャンネルxユーザーの直近の投稿をGPTで要約する
 
 Usage:
-  slack-cli summarize:user --channel-name aaa --user-id bbb [options]
+  slack-cli summarize:member --channel-name aaa --member-id bbb [options]
 
 Options:
-  --channel-id      集計対象チャンネルID。--channel-id or --channel-name が必須。
-  --channel-name    集計対象チャンネル名。--channel-id or --channel-name が必須。
-  --user-id, -u     ユーザーのID。user-id or user-fuzzy-name が必須
-  --user-fuzzy-name ユーザーのアカウント名。完全一致である必要はないが、複数当てはまる場合は最初にヒットしたユーザーにマッピングされるので注意。
-  --limit           取得する投稿数（チャンネルの最新投稿を limit 件ずつ取得して対象ユーザーの投稿が limit 件になるまで取得する。スレッドの投稿を取得する都合上大幅に超えてしまうこともある）
-  --as-user         BOT のトークンを利用せず、ユーザートークンを利用してリクエストを行う。デフォルト false
+  --channel-id        集計対象チャンネルID。--channel-id or --channel-name が必須。
+  --channel-name      集計対象チャンネル名。--channel-id or --channel-name が必須。
+  --member-id, -u     メンバーのID。user-id or user-fuzzy-name が必須
+  --member-fuzzy-name メンバーのアカウント名。完全一致である必要はないが、複数当てはまる場合は最初にヒットしたユーザーにマッピングされるので注意。
+  --limit             取得する投稿数（チャンネルの最新投稿を limit 件ずつ取得して対象ユーザーの投稿が limit 件になるまで取得する。スレッドの投稿を取得する都合上大幅に超えてしまうこともある）
+  --as-user           BOT のトークンを利用せず、ユーザートークンを利用してリクエストを行う。デフォルト false
 
-  --help, -h        このヘルプを表示
-  --dry-run         投稿はせずに投稿内容をログ出力する
+  --help, -h          このヘルプを表示
+  --dry-run           投稿はせずに投稿内容をログ出力する
 `;
 
 function parseArgs(argv?: string[]) {
@@ -34,8 +34,8 @@ function parseArgs(argv?: string[]) {
         // Types
         '--channel-id': String,
         '--channel-name': String,
-        '--user-id': String,
-        '--user-fuzzy-name': String,
+        '--member-id': String,
+        '--member-fuzzy-name': String,
         '--limit': Number,
         '--dry-run': Boolean,
         '--as-user': Boolean,
@@ -44,7 +44,7 @@ function parseArgs(argv?: string[]) {
 
         // Alias
         '-h': '--help',
-        '-u': '--user-id',
+        '-u': '--member-id',
       },
       { argv }
     );
@@ -73,8 +73,8 @@ export const exec: CliExecFn = async (argv) => {
   const { channel, member: user } = await retrieveInfoForArgs({
     channelId: args['--channel-id'],
     channelName: args['--channel-name'],
-    memberId: args['--user-id'],
-    memberFuzzyName: args['--user-fuzzy-name'],
+    memberId: args['--member-id'],
+    memberFuzzyName: args['--member-fuzzy-name'],
   });
   if (!channel || !channel.id || !user || !user.id) {
     Log.error(summarizeHelpText);

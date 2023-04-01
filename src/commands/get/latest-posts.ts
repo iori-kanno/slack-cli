@@ -1,9 +1,11 @@
 import arg from 'arg';
-import { invalidOptionText, listUpMembersHelpText } from '../../lib/messages';
+import { invalidOptionText } from '../../lib/messages';
 import { CliExecFn } from '../../types';
 import * as Log from '../../lib/log';
 import { getAllChannels } from '../../api/slack/channel';
 import { parseOptions } from '../../lib/parser';
+
+const helpText = `TODO: help text`;
 
 function parseArgs(argv?: string[]) {
   try {
@@ -28,7 +30,7 @@ function parseArgs(argv?: string[]) {
     } else {
       Log.error(e);
     }
-    Log.error(listUpMembersHelpText);
+    Log.error(helpText);
     return null;
   }
 }
@@ -38,7 +40,7 @@ export const exec: CliExecFn = async (argv) => {
   if (args === null) return;
 
   if (args['--help']) {
-    Log.success(listUpMembersHelpText);
+    Log.success(helpText);
     return;
   }
   const options = parseOptions(args);

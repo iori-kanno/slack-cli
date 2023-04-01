@@ -9,6 +9,19 @@ import {
 } from '../api/slack/channel';
 import { parseOptions } from '../lib/parser';
 
+const helpText = `
+Command:
+  slack-cli join:public-channels  BOT が参加していないパブリックチャンネルにユーザーを先に参加させてから BOT を招待することで参加させる
+
+Usage:
+  slack-cli join:public-channels [options]
+
+Options:
+  --help, -h        このヘルプを表示
+  --debug           デバッグモードで実行する
+  --dry-run         処理はせずに投稿内容をログ出力する
+`;
+
 function parseArgs(argv?: string[]) {
   try {
     return arg(
@@ -29,7 +42,7 @@ function parseArgs(argv?: string[]) {
     } else {
       Log.error(e);
     }
-    Log.error('TODO: 記載');
+    Log.error(helpText);
     return null;
   }
 }
@@ -39,7 +52,7 @@ export const exec: CliExecFn = async (argv) => {
   if (args === null) return;
 
   if (args['--help']) {
-    Log.success('TODO: 記載');
+    Log.success(helpText);
     return;
   }
 

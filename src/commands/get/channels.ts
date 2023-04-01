@@ -26,8 +26,10 @@ Options:
   --sort-members    メンバー数順に並び替えて表示
   --asc             --sort オプションと一緒に使用。デフォルトは asc
   --desc            --sort オプションと一緒に使用。デフォルトは asc
+  --show-archived   アーカイブ済みのチャンネルも表示する。デフォルトは非表示
 
   --help, -h        このヘルプを表示
+  TODO: 指定したチャンネルに投稿できるようにする
   --dry-run         投稿はせずに投稿内容をログ出力する
 `;
 
@@ -116,10 +118,10 @@ export const exec: CliExecFn = async (argv) => {
       return true;
     })
     .filter((c) =>
-      includes.length === 0 ? true : includes.find((i) => c.name?.includes(i))
+      includes.length === 0 ? true : includes.some((i) => c.name?.includes(i))
     )
     .filter((c) =>
-      excludes.length === 0 ? true : !excludes.find((i) => c.name?.includes(i))
+      excludes.length === 0 ? true : !excludes.some((i) => c.name?.includes(i))
     )
     .filter((c) =>
       maxMembers === undefined ? true : (c.num_members || 0) < maxMembers
@@ -157,14 +159,16 @@ export const exec: CliExecFn = async (argv) => {
   const filterText = [
     prefix ? `前方一致: ${prefix}` : undefined,
     suffix ? `後方一致: ${suffix}` : undefined,
-    maxMembers ? `上限人数: ${maxMembers}` : undefined,
+    maxMembers !== undefined ? `上限人数: ${maxMembers}` : undefined,
     minMembers !== undefined ? `下限人数: ${minMembers}` : undefined,
   ]
     .filter((t) => t)
     .join('\n');
 
   Log.success(
-    `\n${searchText}\n${filterText}\nパブリックチャンネル一覧（${
+    `\n${[searchText, filterText]
+      .filter((t) => t)
+      .join('\n')}\nパブリックチャンネル一覧（${
       sortedChannels.length
     }）\n${sortedChannels
       .map(
@@ -191,8 +195,8 @@ const convertToSimpleDate = (created: number | undefined) => {
   const date = new Date(created * 1000);
   return (
     `${date.getFullYear()}/` +
-    `${date.getMonth()}`.padStart(2, '0') +
+    `${date.getMonth() + 1}`.padStart(2, '0') +
     '/' +
-    `${date.getDay()}`.padStart(2, '0')
+    `${date.getDate()}`.padStart(2, '0')
   );
 };

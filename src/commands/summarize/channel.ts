@@ -19,7 +19,7 @@ Usage:
 Options:
   --channel-id      集計対象チャンネルID。--channel-id or --channel-name が必須。
   --channel-name    集計対象チャンネル名。--channel-id or --channel-name が必須。
-  --limit           取得する投稿数
+  --limit           取得する投稿数。デフォルトは 500件（スレッドの投稿を取得する都合上大幅に超えてしまうこともある）
   --as-user         BOT のトークンを利用せず、ユーザートークンを利用してリクエストを行う。デフォルト false
 
   --help, -h        このヘルプを表示
@@ -41,7 +41,6 @@ function parseArgs(argv?: string[]) {
 
         // Alias
         '-h': '--help',
-        '-u': '--user-id',
       },
       { argv }
     );

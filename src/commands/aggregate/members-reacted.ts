@@ -1,8 +1,5 @@
 import arg from 'arg';
-import {
-  invalidOptionText,
-  byEachMemberReactedHelpText,
-} from '../../lib/messages';
+import { invalidOptionText } from '../../lib/messages';
 import { CliExecFn } from '../../types';
 import * as Log from '../../lib/log';
 import { retrieveAllUser } from '../../api/user';
@@ -12,6 +9,26 @@ import { Channel } from '@slack/web-api/dist/response/ChannelsListResponse';
 import groupBy from 'just-group-by';
 import { aggregateUniqItemsReactedByMembers } from '../../lib/aggregator';
 import { parseOptions } from '../../lib/parser';
+
+const byEachMemberReactedHelpText = `
+Command:
+  slack-cli aggregate:members-reacted  指定された期間内に指定されたリアクションを行った回数をユーザー毎に集計してX名リストアップする
+
+Usage:
+  slack-cli aggregate:members-reacted [options]
+
+Options:
+  --channel-id      投稿先チャンネルID。--channel-id or --channel-name が必須。
+  --channel-name    投稿先チャンネル名。--channel-id or --channel-name が必須。
+  --start-date      集計対象の期間の開始日時。指定例: '2022-12-01T00:00:00'
+  --end-date        集計対象の期間の終了日時。指定例: '2022-12-01T00:00:00'
+  --reactions       集計対象のリアクション文字列。カンマ区切りで指定する。デフォルト '+1,pray'
+  --dry-run         投稿はせずに投稿内容をログ出力する
+  --as-user         BOT のトークンを利用せず、ユーザートークンを利用してリクエストを行う。デフォルト false
+  --no-mention      投稿時にメンションしない場合にのみ指定する
+  --debug           指定した場合デバッグログを出力する
+  --help, -h        このヘルプを表示
+`;
 
 function parseArgs(argv?: string[]) {
   try {
