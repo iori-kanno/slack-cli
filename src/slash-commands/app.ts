@@ -10,4 +10,3 @@ export const app = new App({
   token: process.env.SLACK_BOT_TOKEN,
   logger,
 });
-export const port = process.env.PORT || 3300;

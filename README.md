@@ -34,6 +34,14 @@ https://api.slack.com/ にて作成して設定してください。
 
 環境変数 `SLACK_SIGNING_SECRET` を設定した上で Slack App に `/slack-cli` を登録した上で `bot:start` コマンドにて起動してください。
 
+特定のユーザーのみ利用できるようにしたい場合は `--permitted-users` オプションに `,` 区切りで許可したいユーザーの user-id を指定してください。
+
+その他、 `--debug` と `--port` が指定可能です。ポート番号のデフォルト値は 3000 です。
+
+```
+bot:start --debug --permitted-users "UXXXXX,UYYYYY" --port 3001
+```
+
 ## コマンド
 
 `slack-cli --help` にて一覧を確認できます。
