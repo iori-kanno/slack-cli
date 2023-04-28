@@ -75,7 +75,7 @@ export const exec: CliExecFn = async (argv) => {
 
   if (args['--help']) {
     Log.success(helpText);
-    return;
+    return { text: helpText };
   }
   if (
     [args['--sort-date'], args['--sort-members'], args['--sort-name']].filter(
@@ -164,21 +164,26 @@ export const exec: CliExecFn = async (argv) => {
     .filter((t) => t)
     .join('\n');
 
-  Log.success(
-    `\n${[searchText, filterText]
-      .filter((t) => t)
-      .join('\n')}\nパブリックチャンネル一覧（${
-      sortedChannels.length
-    }）\n${sortedChannels
-      .map(
-        (c) =>
-          c.id?.padEnd(11, ' ') +
-          ': ' +
-          c.name?.padEnd(maxLength + 1, ' ') +
-          `${additionalInfo(c, numOfDigits)}`
-      )
-      .join('\n')}`
-  );
+  const response = `\n${[searchText, filterText]
+    .filter((t) => t)
+    .join('\n')}\nパブリックチャンネル一覧（${
+    sortedChannels.length
+  }）\n${sortedChannels
+    .map(
+      (c) =>
+        c.id?.padEnd(11, ' ') +
+        ': ' +
+        c.name?.padEnd(maxLength + 1, ' ') +
+        `${additionalInfo(c, numOfDigits)}`
+    )
+    .join('\n')}`;
+
+  if (options.dryRun) {
+    Log.success(response);
+    return;
+  }
+
+  return { text: response };
 };
 
 const additionalInfo = (c: Channel, numOfDigits: number) => {

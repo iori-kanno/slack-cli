@@ -2,13 +2,13 @@ import arg from 'arg';
 import { invalidOptionText } from '../../lib/messages';
 import { CliExecFn } from '../../types';
 import * as Log from '../../lib/log';
-import { getAllChannels, showMembersInChannel } from '../../api/slack/channel';
+import { showMembersInChannel } from '../../api/slack/channel';
 import { parseOptions } from '../../lib/parser';
 import { retrieveAllUser } from '../../api/user';
 import { retrieveInfoForArgs } from '../../lib/arguments';
 import { Member } from '@slack/web-api/dist/response/UsersListResponse';
 
-const getMembersHelpText = `
+const helpText = `
 Command:
   slack-cli get:members  Slackに参加しているメンバー一覧を出力する。チャンネルを指定するとそのチャンネルに参加しているメンバーのみを出力する。
 
@@ -44,7 +44,7 @@ function parseArgs(argv?: string[]) {
     } else {
       Log.error(e);
     }
-    Log.error(getMembersHelpText);
+    Log.error(helpText);
     return null;
   }
 }
@@ -54,8 +54,8 @@ export const exec: CliExecFn = async (argv) => {
   if (args === null) return;
 
   if (args['--help']) {
-    Log.success(getMembersHelpText);
-    return;
+    Log.success(helpText);
+    return { text: helpText };
   }
   const options = parseOptions(args);
 
@@ -75,11 +75,15 @@ export const exec: CliExecFn = async (argv) => {
     members.push(...allMembers);
   }
 
-  const text = `${channel ? '#' + channel.name : ''} メンバー一覧 (${
+  const response = `${channel ? '#' + channel.name : ''} メンバー一覧 (${
     members.length
   }, 内 BOT ${members.filter((m) => m.is_bot).length})\n${members
     .map((m) => `${m.id}: ${m.real_name ?? m.name}${m.is_bot ? ' (BOT)' : ''}`)
     .join('\n')}`;
 
-  Log.success(text);
+  if (options.dryRun) {
+    Log.success(response);
+    return;
+  }
+  return { text: response };
 };

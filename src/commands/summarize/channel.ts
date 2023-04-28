@@ -10,7 +10,7 @@ import { summarizeChannel } from '../../api/gpt/summarize/channel';
 import { replaceMemberIdToNameInTexts } from '../../lib/helper';
 import { validate } from '../../api/gpt';
 
-const summarizeHelpText = `
+const helpText = `
 Command:
   slack-cli summarize:channel    指定されたチャンネルの直近の投稿をGPTで要約する
   * 環境変数に OPENAI_API_KEY, OPENAI_API_BASE の設定が必要。
@@ -53,18 +53,17 @@ function parseArgs(argv?: string[]) {
     } else {
       Log.error(e);
     }
-    Log.warn(summarizeHelpText);
+    Log.warn(helpText);
     return null;
   }
 }
 
-export const exec: CliExecFn = async (argv) => {
+export const exec: CliExecFn = async (argv, progress) => {
   const args = parseArgs(argv);
   if (args === null) return;
 
   if (args['--help']) {
-    Log.success(summarizeHelpText);
-    return;
+    return { text: helpText };
   }
   const options = parseOptions(args);
   if (!validate()) return;
@@ -74,18 +73,24 @@ export const exec: CliExecFn = async (argv) => {
     channelName: args['--channel-name'],
   });
   if (!channel || !channel.id) {
-    Log.error(summarizeHelpText);
-    return;
+    Log.error(helpText);
+    return { error: 'channel not found' };
   }
-  const limit = args['--limit'] || 500;
+  const limit = Math.min(args['--limit'] || 500, 1000);
+  progress?.({ percent: 0, message: `${limit}件の投稿を取得開始します...` });
 
   // 投稿一覧
   const targetMessages = await getAllConversations(
-    { channel: channel.id, limit: Math.min(limit, 1000) },
+    { channel: channel.id, limit },
     limit,
     undefined,
     options
   );
+
+  progress?.({
+    percent: 30,
+    message: `${targetMessages.length}件の投稿を取得しました。要約を開始します...`,
+  });
 
   const targetText = await replaceMemberIdToNameInTexts(
     targetMessages.map((m) =>
@@ -111,9 +116,13 @@ export const exec: CliExecFn = async (argv) => {
       .join('\n')}`;
     if (args['--dry-run']) {
       Log.success(text);
-    } else {
-      await postMessageToSlack({ channel: channel!.id!, text }, options);
+      return;
     }
+    return {
+      asUser: !options.asBot,
+      postArg: { channel: channel!.id!, text },
+      text,
+    };
   } catch (e) {
     Log.error(e);
   }

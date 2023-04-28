@@ -11,8 +11,9 @@ import { getAllChannels } from '../../api/slack/channel';
 import { Channel } from '@slack/web-api/dist/response/ChannelsListResponse';
 import groupBy from 'just-group-by';
 import { parseOptions } from '../../lib/parser';
+import shuffle from 'just-shuffle';
 
-const aggregateReactionsHelpText = `
+const helpText = `
 Command:
   slack-cli aggregate:reactions    指定された期間内に指定されたリアクション数が多いユーザーを最大5名リストアップする
 
@@ -20,14 +21,15 @@ Usage:
   slack-cli aggregate:reactions --channel-name general [options]
 
 Options:
-  --channel-id      投稿先チャンネルID。--channel-id or --channel-name が必須。
-  --channel-name    投稿先チャンネル名。--channel-id or --channel-name が必須。
+  --channel-id      投稿先チャンネルID。--channel-id or --channel-name が必須（slash-commnad の場合無視される）
+  --channel-name    投稿先チャンネル名。--channel-id or --channel-name が必須（slash-command の場合無視される）
   --start-date      集計対象の期間の開始日時。指定例: '2022-12-01T00:00:00'
   --end-date        集計対象の期間の終了日時。指定例: '2022-12-01T00:00:00'
   --reactions       集計対象のリアクション文字列。カンマ区切りで指定する。デフォルト '+1,pray'
+  --include-bot-ids 集計対象の BOT ID。含めたい BOT ID をカンマ区切りで指定する
   --no-mention      投稿時にメンションしない場合にのみ指定する
   --dry-run         投稿はせずに投稿内容をログ出力する
-  --as-user         BOT のトークンを利用せず、ユーザートークンを利用してリクエストを行う。デフォルト false
+  --as-user         BOT のトークンを利用せず、ユーザートークンを利用してリクエストを行う。デフォルト false。cli では利用不可。
   --debug           指定した場合デバッグログを出力する
   --help, -h        このヘルプを表示
 `;
@@ -42,6 +44,7 @@ function parseArgs(argv?: string[]) {
         '--start-date': String,
         '--end-date': String,
         '--reactions': String,
+        '--include-bot-ids': String,
         '--no-mention': Boolean,
         '--dry-run': Boolean,
         '--as-user': Boolean,
@@ -59,18 +62,17 @@ function parseArgs(argv?: string[]) {
     } else {
       Log.error(e);
     }
-    Log.error(aggregateReactionsHelpText);
+    Log.error(helpText);
     return null;
   }
 }
 
-export const exec: CliExecFn = async (argv) => {
+export const exec: CliExecFn = async (argv, progress) => {
   const args = parseArgs(argv);
   if (args === null) return;
 
   if (args['--help']) {
-    Log.success(aggregateReactionsHelpText);
-    return;
+    return { text: helpText };
   }
   const options = parseOptions(args);
 
@@ -96,18 +98,31 @@ export const exec: CliExecFn = async (argv) => {
     }
   }
 
-  const users = (await retrieveAllUser()).filter(
-    (u) =>
-      !u.is_bot &&
-      !u.deleted &&
-      !u.is_restricted &&
-      !u.is_ultra_restricted &&
-      !u.is_workflow_bot
+  const users = shuffle(
+    (await retrieveAllUser()).filter(
+      (u) =>
+        (!u.is_bot ||
+          (args['--include-bot-ids'] ?? '')
+            .split(',')
+            .some((id) => u.id === id)) &&
+        !u.deleted &&
+        !u.is_restricted &&
+        !u.is_ultra_restricted &&
+        !u.is_workflow_bot
+    )
   );
+  progress?.({
+    percent: 0,
+    message: `${users.length}人分のリアクション履歴を取得します`,
+  });
 
   let items: Item[] = [];
-  for (const member of users) {
+  for (const [index, member] of users.entries()) {
     items.push(...(await getAllReactedItems({ user: member?.id }, options)));
+    progress?.({
+      percent: ((index + 1) / users.length) * 100,
+      message: `${member?.name}のリアクション履歴を取得しました`,
+    });
   }
   Log.debug(`集計対象投稿数（重複含む）: ${items.length}`);
 

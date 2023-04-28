@@ -2,9 +2,10 @@ export const commandListText = `
 Command:
   slack-cli aggregate:members-reacted 指定された期間内に指定されたリアクションを最も行ったユーザー最大5名をリストアップする
   slack-cli aggregate:reactions       指定された期間内に指定されたリアクション数が多いユーザーを最大5名リストアップする
+  slack-cli delete:message            指定された投稿を削除する（この BOT が投稿したもののみ）
   slack-cli get:channels              チャンネル一覧を表示する
   slack-cli get:members               メンバー一覧を表示する
-  slack-cli join:public-channels      BOT を全てのパブリックチャンネルに参加させる。ユーザートークンが必須。
+  slack-cli join:public-channels      BOT を全てのパブリックチャンネルに参加させる。ユーザートークンが必須。（slash-command の場合使用不可）
   slack-cli listup:reactions          指定された投稿に付いているリアクションを集計してスレッドに投稿する
   slack-cli summarize:channel         指定されたチャンネルの直近の投稿を GPT で要約する
   slack-cli summarize:member          指定されたユーザーの直近の投稿を GPT で要約する

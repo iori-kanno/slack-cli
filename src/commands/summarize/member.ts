@@ -9,7 +9,7 @@ import { summarizeUser } from '../../api/gpt/summarize/user';
 import { retrieveInfoForArgs } from '../../lib/arguments';
 import { validate } from '../../api/gpt';
 
-const summarizeHelpText = `
+const helpText = `
 Command:
   slack-cli summarize:member  指定されたチャンネルxユーザーの直近の投稿をGPTで要約する
   * 環境変数に OPENAI_API_KEY, OPENAI_API_BASE の設定が必要。
@@ -57,21 +57,20 @@ function parseArgs(argv?: string[]) {
     } else {
       Log.error(e);
     }
-    Log.warn(summarizeHelpText);
+    Log.warn(helpText);
     return null;
   }
 }
 
-export const exec: CliExecFn = async (argv) => {
+export const exec: CliExecFn = async (argv, progress) => {
   const args = parseArgs(argv);
   if (args === null) return;
 
   if (args['--help']) {
-    Log.success(summarizeHelpText);
-    return;
+    return { text: helpText };
   }
   const options = parseOptions(args);
-  if (!validate()) return;
+  if (!validate()) return { error: 'OpenAPI 関連の設定を見直してください' };
 
   const { channel, member: user } = await retrieveInfoForArgs({
     channelId: args['--channel-id'],
@@ -80,10 +79,14 @@ export const exec: CliExecFn = async (argv) => {
     memberFuzzyName: args['--member-fuzzy-name'],
   });
   if (!channel || !channel.id || !user || !user.id) {
-    Log.error(summarizeHelpText);
-    return;
+    Log.error(helpText);
+    return {
+      error:
+        'channel-id, channel-name, member-id, member-fuzzy-name のいずれかが足りません',
+    };
   }
-  const limit = args['--limit'] || 500;
+  const limit = Math.min(args['--limit'] || 500, 1000);
+  progress?.({ percent: 0, message: `${limit}件の投稿を取得開始します...` });
 
   // 投稿一覧（対象者以外の投稿含む）
   const conversations = await getAllConversations(
@@ -92,6 +95,11 @@ export const exec: CliExecFn = async (argv) => {
     [user.id],
     options
   );
+
+  progress?.({
+    percent: 30,
+    message: `${conversations.length}件の投稿を取得しました。要約を開始します...`,
+  });
 
   // 対象者の投稿一覧
   const targetMessages = conversations.filter(
@@ -129,9 +137,13 @@ export const exec: CliExecFn = async (argv) => {
       .join('\n')}`;
     if (args['--dry-run']) {
       Log.success(text);
-    } else {
-      await postMessageToSlack({ channel: channel!.id!, text }, options);
+      return;
     }
+    return {
+      asUser: !options.asBot,
+      postArg: { channel: channel.id!, text },
+      text,
+    };
   } catch (e) {
     Log.error(e);
   }

@@ -6,7 +6,7 @@ export const exec: CliExecFn = () => {
   const version = getCurrentCliVersion();
   if (!version) {
     Log.error('バージョンを取得できませんでした');
-    return;
+    return { error: 'バージョンを取得できませんでした' };
   }
-  Log.success(version);
+  return { text: version };
 };

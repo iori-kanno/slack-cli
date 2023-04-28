@@ -34,7 +34,9 @@ function parseArgs(argv?: string[]) {
   }
 }
 
-export const aggregateUniqItemsReactedByMembers = async (argv) => {
+export const aggregateUniqItemsReactedByMembers = async (
+  argv: string[] | undefined
+) => {
   const args = parseArgs(argv);
   if (args === null) return;
 
