@@ -10,7 +10,7 @@ import groupBy from 'just-group-by';
 import { aggregateUniqItemsReactedByMembers } from '../../lib/aggregator';
 import { parseOptions } from '../../lib/parser';
 
-const byEachMemberReactedHelpText = `
+const helpText = `
 Command:
   slack-cli aggregate:members-reacted  指定された期間内に指定されたリアクションを行った回数をユーザー毎に集計してX名リストアップする
 
@@ -57,7 +57,7 @@ function parseArgs(argv?: string[]) {
     } else {
       Log.error(e);
     }
-    Log.error(byEachMemberReactedHelpText);
+    Log.error(helpText);
     return null;
   }
 }
@@ -75,8 +75,7 @@ export const exec: CliExecFn = async (argv) => {
   if (args === null) return;
 
   if (args['--help']) {
-    Log.success(byEachMemberReactedHelpText);
-    return;
+    return { text: helpText };
   }
   const options = parseOptions(args);
   // dry-run でないなら投稿先チャンネルは必須
@@ -138,7 +137,6 @@ export const exec: CliExecFn = async (argv) => {
     }
   }
 
-  console.log(reactionNameToReactedMemberDict);
   const blocks: string[] = [];
   for (const [rid, dict] of Object.entries(
     reactionNameToReactedMemberDict
@@ -180,29 +178,29 @@ export const exec: CliExecFn = async (argv) => {
 
   if (args['--dry-run']) {
     Log.success(blocks);
-  } else {
-    Log.success(blocks);
-    await postMessageToSlack(
-      {
-        channel: channel!.id!,
-        text: '',
-        blocks: [
-          `${options.startDate?.toLocaleDateString() ?? '未設定'}~${
-            options.endDate?.toLocaleDateString() ?? '現在'
-          }の期間で最もリアクションを行った人を発表します🎉`,
-          ...blocks,
-        ].flatMap((b) => [
-          { type: 'divider' },
-          {
-            type: 'section',
-            text: {
-              type: 'mrkdwn',
-              text: b,
-            },
-          },
-        ]),
-      },
-      options
-    );
+    return;
   }
+  Log.debug(blocks);
+  return {
+    asUser: !options.asBot,
+    postArg: {
+      channel: channel!.id!,
+      text: '',
+      blocks: [
+        `${options.startDate?.toLocaleDateString() ?? '未設定'}~${
+          options.endDate?.toLocaleDateString() ?? '現在'
+        }の期間で最もリアクションを行った人を発表します🎉`,
+        ...blocks,
+      ].flatMap((b) => [
+        { type: 'divider' },
+        {
+          type: 'section',
+          text: {
+            type: 'mrkdwn',
+            text: b,
+          },
+        },
+      ]),
+    },
+  };
 };

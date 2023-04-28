@@ -16,7 +16,7 @@ export const parseOptions = (args: arg.Result<any>) => {
 };
 
 const reg = new RegExp(
-  '^https://.+.slack.com/archives/([A-Z\\d]+)/p(\\d{16}).*$'
+  '^<?https://.+.slack.com/archives/([A-Z\\d]+)/p(\\d{16}).*$'
 );
 export const parseSlackUrl = (
   url: string

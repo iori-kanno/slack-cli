@@ -54,7 +54,7 @@ export const exec: CliExecFn = async (argv) => {
 
   if (args['--help']) {
     Log.success(helpText);
-    return;
+    return { text: helpText };
   }
 
   const options = parseOptions(args);

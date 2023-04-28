@@ -38,7 +38,7 @@ export const chatWithGpt = async (
     Log.debug(completion.data);
     return completion;
   } catch (e) {
-    Log.error(e.toJSON());
+    Log.error(e);
   }
 };
 
