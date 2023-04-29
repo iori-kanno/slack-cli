@@ -120,7 +120,9 @@ export const exec: CliExecFn = async (argv, progress) => {
 
   let items: Item[] = [];
   for (const [index, member] of users.entries()) {
-    items.push(...(await getAllReactedItems({ user: member?.id }, options)));
+    items.push(
+      ...(await getAllReactedItems({ user: member?.id, limit: 500 }, options))
+    );
     progress?.({
       percent: ((index + 1) / users.length) * 100,
       message: `${member?.name}のリアクション履歴を取得しました`,

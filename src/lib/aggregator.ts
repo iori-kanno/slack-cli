@@ -59,7 +59,7 @@ export const aggregateUniqItemsReactedByMembers = async (
   let items: Item[] = [];
   for (const member of users) {
     items.push(
-      ...(await getAllReactedItems({ user: member?.id, limit: 200 }, options))
+      ...(await getAllReactedItems({ user: member?.id, limit: 500 }, options))
     );
   }
   Log.debug(`集計対象投稿数（重複含む）: ${items.length}`);
