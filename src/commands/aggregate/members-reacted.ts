@@ -3,12 +3,12 @@ import { invalidOptionText } from '../../lib/messages';
 import { CliExecFn } from '../../types';
 import * as Log from '../../lib/log';
 import { retrieveAllUser } from '../../api/user';
-import { postMessageToSlack } from '../../api/slack/chat';
 import { getAllChannels } from '../../api/slack/channel';
 import { Channel } from '@slack/web-api/dist/response/ChannelsListResponse';
 import groupBy from 'just-group-by';
 import { aggregateUniqItemsReactedByMembers } from '../../lib/aggregator';
 import { parseOptions } from '../../lib/parser';
+import { parseReactions } from './utils/reactions-parser';
 
 const helpText = `
 Command:
@@ -22,7 +22,9 @@ Options:
   --channel-name    投稿先チャンネル名。--channel-id or --channel-name が必須。
   --start-date      集計対象の期間の開始日時。指定例: '2022-12-01T00:00:00'
   --end-date        集計対象の期間の終了日時。指定例: '2022-12-01T00:00:00'
-  --reactions       集計対象のリアクション文字列。カンマ区切りで指定する。デフォルト '+1,pray'
+  --reactions       集計対象のリアクション文字列。カンマ区切りで複数指定が可能。
+                    []で括ると集計を一つにまとめることができる。デフォルト '+1,pray'
+                    例）--reactions '+1,[pray,joy],heart' と指定した場合、pray と joy は集計を一つにまとめることができる
   --dry-run         投稿はせずに投稿内容をログ出力する
   --as-user         BOT のトークンを利用せず、ユーザートークンを利用してリクエストを行う。デフォルト false
   --no-mention      投稿時にメンションしない場合にのみ指定する
@@ -91,9 +93,8 @@ export const exec: CliExecFn = async (argv) => {
   }
 
   const targetItems = (await aggregateUniqItemsReactedByMembers(argv)) || [];
-  const targetReactions = args['--reactions']
-    ? args['--reactions'].split(',')
-    : ['to-be-oriented', 'feelspecial', 'simplify-x', 'simplify-x-2', 'www'];
+  const { targetReactions, singleReactions, categorizedReactions } =
+    parseReactions(args['--reactions']);
 
   const users = (await retrieveAllUser()).filter(
     (u) =>
@@ -135,6 +136,32 @@ export const exec: CliExecFn = async (argv) => {
         rDict[user] = (rDict[user] ?? 0) + 1;
       }
     }
+  }
+
+  if (categorizedReactions.length > 0) {
+    Log.debug(categorizedReactions);
+    for (const reactionNames of categorizedReactions) {
+      // 後で表示する際にそのまま使える形で key にする
+      // そのため、最初と最後の : が不要（ aa::bb::cc となる）
+      const key = reactionNames
+        .map((r, i) => `${i !== 0 ? ':' : ''}${r}`)
+        .join(':');
+      const categorizedValue: MemberDictionary = {};
+      reactionNameToReactedMemberDict[key] = categorizedValue;
+
+      for (const midToCount of reactionNames.map(
+        (name) => reactionNameToReactedMemberDict[name]
+      )) {
+        // 全メンバーのまとめる対象の count を合計する
+        for (const [mid, count] of Object.entries(midToCount)) {
+          categorizedValue[mid] = count + (categorizedValue[mid] ?? 0);
+        }
+      }
+    }
+    // single で指定されていないものを削除する
+    targetReactions
+      .filter((r) => !singleReactions.includes(r))
+      .forEach((r) => delete reactionNameToReactedMemberDict[r]);
   }
 
   const blocks: string[] = [];

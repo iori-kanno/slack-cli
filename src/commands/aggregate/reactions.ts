@@ -12,6 +12,7 @@ import { Channel } from '@slack/web-api/dist/response/ChannelsListResponse';
 import groupBy from 'just-group-by';
 import { parseOptions } from '../../lib/parser';
 import shuffle from 'just-shuffle';
+import { parseReactions } from './utils/reactions-parser';
 
 const helpText = `
 Command:
@@ -25,7 +26,9 @@ Options:
   --channel-name    投稿先チャンネル名。--channel-id or --channel-name が必須（slash-command の場合無視される）
   --start-date      集計対象の期間の開始日時。指定例: '2022-12-01T00:00:00'
   --end-date        集計対象の期間の終了日時。指定例: '2022-12-01T00:00:00'
-  --reactions       集計対象のリアクション文字列。カンマ区切りで指定する。デフォルト '+1,pray'
+  --reactions       集計対象のリアクション文字列。カンマ区切りで複数指定が可能。
+                    []で括ると集計を一つにまとめることができる。デフォルト '+1,pray'
+                    例）--reactions '+1,[pray,joy],heart' と指定した場合、pray と joy は集計を一つにまとめることができる
   --include-bot-ids 集計対象の BOT ID。含めたい BOT ID をカンマ区切りで指定する
   --no-mention      投稿時にメンションしない場合にのみ指定する
   --dry-run         投稿はせずに投稿内容をログ出力する
@@ -82,9 +85,8 @@ export const exec: CliExecFn = async (argv, progress) => {
     options.startDate?.setMonth(options.endDate!.getMonth() - 1);
   }
 
-  const targetReactions = args['--reactions']
-    ? args['--reactions'].split(',')
-    : ['to-be-oriented', 'feelspecial', 'simplify-x', 'simplify-x-2', 'www'];
+  const { targetReactions, singleReactions, categorizedReactions } =
+    parseReactions(args['--reactions']);
 
   // dry-run でないなら投稿先チャンネルは必須
   let channel: Channel | undefined;
@@ -118,7 +120,9 @@ export const exec: CliExecFn = async (argv, progress) => {
 
   let items: Item[] = [];
   for (const [index, member] of users.entries()) {
-    items.push(...(await getAllReactedItems({ user: member?.id }, options)));
+    items.push(
+      ...(await getAllReactedItems({ user: member?.id, limit: 500 }, options))
+    );
     progress?.({
       percent: ((index + 1) / users.length) * 100,
       message: `${member?.name}のリアクション履歴を取得しました`,
@@ -144,9 +148,45 @@ export const exec: CliExecFn = async (argv, progress) => {
       return acc;
     }, new Map<string, Array<{ mid: string; count: number }>>());
 
+  if (categorizedReactions.length > 0) {
+    Log.debug(categorizedReactions);
+    for (const reactionNames of categorizedReactions) {
+      // 後で表示する際にそのまま使える形で key にする
+      // そのため、最初と最後の : が不要（ aa::bb::cc となる）
+      const key = reactionNames
+        .map((r, i) => `${i !== 0 ? ':' : ''}${r}`)
+        .join(':');
+      const categorizedValue = Array<{ mid: string; count: number }>();
+      reactionNameToCount.set(key, categorizedValue);
+
+      for (const nameToCount of reactionNames.map(
+        (name) => reactionNameToCount.get(name) ?? []
+      )) {
+        // 全メンバーのまとめる対象の count を合計する
+        for (const v of nameToCount) {
+          const value = categorizedValue.find((e) => e.mid === v.mid);
+          if (value) {
+            value.count += v.count;
+          } else {
+            categorizedValue.push({ ...v });
+          }
+        }
+      }
+    }
+    // single で指定されていないものを削除する
+    targetReactions
+      .filter((r) => !singleReactions.includes(r))
+      .forEach((r) => reactionNameToCount.delete(r));
+  }
+
   const blocks: string[] = [];
   const keys = [...reactionNameToCount.keys()];
-  for (const key of keys) {
+  for (const key of keys.sort(
+    (a, b) =>
+      // 与えられた入力順で出力できるようにソートする
+      targetReactions.findIndex((r) => r === a) -
+      targetReactions.findIndex((r) => r === b)
+  )) {
     // 同じ獲得数でまとめる
     const candidates = groupBy(reactionNameToCount.get(key)!, (c) => c.count);
     if (Object.keys(candidates).length === 0) {
@@ -173,6 +213,7 @@ export const exec: CliExecFn = async (argv, progress) => {
   }
   blocks.push(
     ...targetReactions
+      .filter((r) => singleReactions.includes(r))
       .filter((r) => ![...keys].includes(r))
       .map((r) => `:${r}: を獲得した人はいませんでした。`)
   );
