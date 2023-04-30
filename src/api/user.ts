@@ -25,7 +25,15 @@ export const retrieveAllUser = async (
   if (Object.keys(cachedMap).length == 0) {
     await makeCache(options);
   }
-  return compact(Object.values(cachedMap));
+  return compact(Object.values(cachedMap)).filter(
+    (u) =>
+      (!u.is_bot ||
+        (options?.includeBotIds ?? '').split(',').some((id) => u.id === id)) &&
+      !u.deleted &&
+      !u.is_restricted &&
+      !u.is_ultra_restricted &&
+      !u.is_workflow_bot
+  );
 };
 
 export const mapUserIdsToMembers = async (

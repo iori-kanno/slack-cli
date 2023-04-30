@@ -91,15 +91,7 @@ export const exec: CliExecFn = async (argv, progress) => {
     }
   }
 
-  const users = (await retrieveAllUser()).filter(
-    (u) =>
-      (!u.is_bot ||
-        (options.includeBotIds ?? '').split(',').some((id) => u.id === id)) &&
-      !u.deleted &&
-      !u.is_restricted &&
-      !u.is_ultra_restricted &&
-      !u.is_workflow_bot
-  );
+  const users = await retrieveAllUser(options);
   const items =
     (await aggregateUniqItemsReactedByMembers(options, progress)) || [];
 

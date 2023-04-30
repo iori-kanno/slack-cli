@@ -9,17 +9,7 @@ export const aggregateUniqItemsReactedByMembers = async (
   options: SlackDemoOptions,
   progress?: ProgressCallback
 ) => {
-  const users = shuffle(
-    (await retrieveAllUser()).filter(
-      (u) =>
-        (!u.is_bot ||
-          (options.includeBotIds ?? '').split(',').some((id) => u.id === id)) &&
-        !u.deleted &&
-        !u.is_restricted &&
-        !u.is_ultra_restricted &&
-        !u.is_workflow_bot
-    )
-  );
+  const users = shuffle(await retrieveAllUser(options));
   progress?.({
     percent: 0,
     message: `${users.length}人分のリアクション履歴を取得します`,

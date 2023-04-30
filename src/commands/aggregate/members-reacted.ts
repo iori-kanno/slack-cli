@@ -97,14 +97,7 @@ export const exec: CliExecFn = async (argv, progress) => {
   const { targetReactions, singleReactions, categorizedReactions } =
     parseReactions(args['--reactions']);
 
-  const users = (await retrieveAllUser()).filter(
-    (u) =>
-      !u.is_bot &&
-      !u.deleted &&
-      !u.is_restricted &&
-      !u.is_ultra_restricted &&
-      !u.is_workflow_bot
-  );
+  const users = await retrieveAllUser(options);
 
   // uniq items からユーザー毎のターゲットリアクションを集計する
   // 投稿者のIDと得られたリアクションの辞書
