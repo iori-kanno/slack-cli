@@ -72,7 +72,7 @@ interface ReactionDictionary {
   [id: string]: MemberDictionary;
 }
 
-export const exec: CliExecFn = async (argv) => {
+export const exec: CliExecFn = async (argv, progress) => {
   const args = parseArgs(argv);
   if (args === null) return;
 
@@ -92,7 +92,8 @@ export const exec: CliExecFn = async (argv) => {
     }
   }
 
-  const targetItems = (await aggregateUniqItemsReactedByMembers(argv)) || [];
+  const targetItems =
+    (await aggregateUniqItemsReactedByMembers(argv, progress)) || [];
   const { targetReactions, singleReactions, categorizedReactions } =
     parseReactions(args['--reactions']);
 
@@ -104,10 +105,7 @@ export const exec: CliExecFn = async (argv) => {
       !u.is_ultra_restricted &&
       !u.is_workflow_bot
   );
-  const memberIds = users
-    .map(({ id }) => id)
-    .filter((id): id is string => typeof id == 'string');
-  // ここから実装
+
   // uniq items からユーザー毎のターゲットリアクションを集計する
   // 投稿者のIDと得られたリアクションの辞書
   const skinToneRegex = /::skin-tone-\d/;

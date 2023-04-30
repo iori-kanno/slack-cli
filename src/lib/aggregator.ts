@@ -5,6 +5,7 @@ import { getAllReactedItems } from '../api/slack/reactions';
 import { retrieveAllUser } from '../api/user';
 import { invalidOptionText } from './messages';
 import { parseOptions } from './parser';
+import { ProgressCallback } from '../types';
 
 function parseArgs(argv?: string[]) {
   try {
@@ -35,7 +36,8 @@ function parseArgs(argv?: string[]) {
 }
 
 export const aggregateUniqItemsReactedByMembers = async (
-  argv: string[] | undefined
+  argv: string[] | undefined,
+  progress?: ProgressCallback
 ) => {
   const args = parseArgs(argv);
   if (args === null) return;
@@ -55,12 +57,20 @@ export const aggregateUniqItemsReactedByMembers = async (
       !u.is_ultra_restricted &&
       !u.is_workflow_bot
   );
+  progress?.({
+    percent: 0,
+    message: `${users.length}人分のリアクション履歴を取得します`,
+  });
 
   let items: Item[] = [];
-  for (const member of users) {
+  for (const [index, member] of users.entries()) {
     items.push(
       ...(await getAllReactedItems({ user: member?.id, limit: 500 }, options))
     );
+    progress?.({
+      percent: ((index + 1) / users.length) * 100,
+      message: `${member?.name}のリアクション履歴を取得しました`,
+    });
   }
   Log.debug(`集計対象投稿数（重複含む）: ${items.length}`);
 

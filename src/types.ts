@@ -5,7 +5,7 @@ type Progress = {
   /** 0-100 */
   percent: number;
 };
-type ProgressCallback = (progress: Progress) => void;
+export type ProgressCallback = (progress: Progress) => void;
 
 export type Commands = { [command: string]: CliExecFn };
 export type ExecOptions = {
