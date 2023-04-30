@@ -4,7 +4,7 @@
   "description": "Slack Demo",
   "license": "MIT",
   "bin": {
-    "slack-cli": "dist/slack-cli.js"
+    "slack-cli": "dist/slack-cli.bundle.js"
   },
   "files": [
     "dist"
@@ -13,8 +13,9 @@
     "dev": "nodemon ./src/entry.ts",
     "build": "webpack -c webpack.js",
     "postbuild": "cp node_modules/gpt-3-encoder/vocab.bpe dist/ && cp node_modules/gpt-3-encoder/encoder.json dist/",
-    "slack-cli": "node dist/slack-cli.js",
-    "bot:start": "nodemon ./src/slash-commands/index.ts"
+    "slack-cli": "node dist/slack-cli.bundle.js",
+    "bot:dev": "nodemon ./src/slash-commands/index.ts",
+    "bot:start": "node dist/slash-command.bundle.js"
   },
   "dependencies": {
     "dayjs": "1.11.6",
