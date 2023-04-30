@@ -6,9 +6,11 @@ export const handleMonitoring = (app: App, channelId?: string) => {
     return app.client.chat.postMessage({
       channel: channelId,
       mrkdwn: true,
-      text: `${command.user_name} commanded \`${command.command} ${
-        command.text
-      }\` ${extraMessage ? `${extraMessage}` : ''}`,
+      text: `${command.trigger_id.split('.')[0]}: ${
+        command.user_name
+      } commanded \`${command.command} ${command.text}\` ${
+        extraMessage ? `${extraMessage}` : ''
+      }`,
     });
   };
 };

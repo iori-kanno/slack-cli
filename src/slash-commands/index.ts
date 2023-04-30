@@ -37,6 +37,10 @@ import { handleMonitoring } from './monitoring';
   app.command('/slack-cli', async ({ command, ack, respond }) => {
     try {
       Log.debug('⚡️ command', command);
+      if (command.text === 'ping') {
+        await ack('pong');
+        return;
+      }
 
       if (
         permittedUsers &&
@@ -69,54 +73,69 @@ import { handleMonitoring } from './monitoring';
         command.channel_id,
         isPublic
       );
-      const resumeLogText = `${command.user_name} commanded \`${command.command} ${command.text}\`.`;
+      const resumeLogText = `${command.trigger_id.split('.')[0]}: ${
+        command.user_name
+      }'s command accepted.\n \`${command.command} ${command.text}\`.`;
       const { ts } = await customRespond({
         text: resumeLogText + '\nstart...',
       });
       let respondCount = 1;
-      const res = await exec(execCommandName, execCommandArgs, {
-        canNotifyUpdate: false,
-        progress: async (p) => {
-          Log.debug(p.message);
-          // NOTE: respond は 5 回までの制約があるので、progress での更新は 4 回までにする
-          if (!isPublic && ++respondCount > 4) return;
-          await customRespond(
-            {
-              text:
-                resumeLogText +
-                `\nprogressing (${Math.trunc(p.percent)}%): ${p.message}`,
-            },
-            ts
-          );
-        },
-      });
-      Log.debug(res);
-      setTimeout(async () => {
-        if (!ts) return;
-        await app.client.chat.delete({
-          ts,
-          channel: command.channel_id,
+      try {
+        const res = await exec(execCommandName, execCommandArgs, {
+          canNotifyUpdate: false,
+          progress: async (p) => {
+            Log.debug(`${command.trigger_id}: ${p.message}`);
+            // NOTE: respond は 5 回までの制約があるので、progress での更新は 4 回までにする
+            if (!isPublic && ++respondCount > 4) return;
+            await customRespond(
+              {
+                text:
+                  resumeLogText +
+                  `\nprogressing (${Math.trunc(p.percent)}%): ${p.message}`,
+              },
+              ts
+            );
+          },
         });
-      }, 10000);
+        Log.debug(res);
+        setTimeout(async () => {
+          if (!ts) return;
+          await app.client.chat.delete({
+            ts,
+            channel: command.channel_id,
+          });
+        }, 10000);
 
-      if (res?.error) {
-        await customRespond({
-          text: `Error: ${res.error}`,
-        });
-        return;
-      }
-      if (res?.text) {
-        await customRespond({
-          text: `${resumeLogText}\n${res.text}`,
-        });
-      } else if (res?.postArg) {
-        const args = res.postArg;
-        await customRespond({
-          text: `${resumeLogText}\n${
-            res.asUser ? '`--as-user` not in service\n' : ''
-          }${res.text ?? ''}`,
-          ...args,
-        });
+        if (res?.error) {
+          await customRespond({
+            text: `${resumeLogText}\nError: ${res.error}`,
+          });
+          return;
+        }
+        if (res?.text) {
+          await customRespond({
+            text: `${resumeLogText}\n${res.text}`,
+          });
+        } else if (res?.postArg) {
+          const args = res.postArg;
+          await customRespond({
+            text: `${resumeLogText}\n${
+              res.asUser ? '`--as-user` not in service\n' : ''
+            }${res.text ?? ''}`,
+            ...args,
+          });
+        }
+      } catch (e) {
+        Log.error(e);
+        await Promise.all([
+          app.client.chat.postMessage({
+            channel: command.channel_id,
+            thread_ts: ts,
+            reply_broadcast: ts !== undefined,
+            text: `エラー発生により処理が中断されました。${e}`,
+          }),
+          monitoring(command, `エラー発生により処理が中断されました。${e}`),
+        ]);
       }
     } catch (e) {
       Log.error(e);
