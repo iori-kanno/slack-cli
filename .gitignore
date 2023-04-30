@@ -1,5 +1,6 @@
 .DS_Store
 /node_modules
+.spreadsheet-credential.json
 yarn-error.log
 /temp
 .temp
