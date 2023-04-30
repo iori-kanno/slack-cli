@@ -93,7 +93,7 @@ export const exec: CliExecFn = async (argv, progress) => {
   }
 
   const targetItems =
-    (await aggregateUniqItemsReactedByMembers(argv, progress)) || [];
+    (await aggregateUniqItemsReactedByMembers(options, progress)) || [];
   const { targetReactions, singleReactions, categorizedReactions } =
     parseReactions(args['--reactions']);
 

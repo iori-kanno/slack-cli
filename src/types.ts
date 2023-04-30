@@ -27,10 +27,12 @@ export type CliExecFn = (
   argv?: string[],
   progress?: ProgressCallback
 ) => Promise<Response> | Response;
+
 export type SlackDemoOptions = {
   asBot?: boolean;
   dryRun?: boolean;
   noMention?: boolean;
   startDate?: Date;
   endDate?: Date;
+  includeBotIds?: string;
 };

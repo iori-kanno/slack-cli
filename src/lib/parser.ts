@@ -4,14 +4,27 @@ import * as Log from './log';
 
 export const parseOptions = (args: arg.Result<any>) => {
   Log.setDebug(args['--debug']);
+  if (args['--dry-run']) Log.warn('dry-run mode enabled.');
+  const endDate = args['--end-date']
+    ? new Date(args['--end-date'])
+    : new Date();
+  let startDate = args['--start-date']
+    ? new Date(args['--start-date'])
+    : undefined;
+  if (!startDate) {
+    startDate = new Date(endDate);
+    startDate?.setMonth(endDate.getMonth() - 1);
+    Log.warn(
+      `startDate is not specified. set startDate to ${startDate.toLocaleString()} endDate to ${endDate.toLocaleString()}`
+    );
+  }
   return {
     asBot: args['--as-user'] === undefined ? true : !args['--as-user'],
     dryRun: args['--dry-run'],
     noMention: args['--no-mention'],
-    startDate: args['--start-date']
-      ? new Date(args['--start-date'])
-      : undefined,
-    endDate: args['--end-date'] ? new Date(args['--end-date']) : undefined,
+    includeBotIds: args['--include-bot-ids'],
+    startDate,
+    endDate,
   } as SlackDemoOptions;
 };
 

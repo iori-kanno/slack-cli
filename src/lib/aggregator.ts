@@ -1,61 +1,24 @@
 import { Item } from '@slack/web-api/dist/response/ReactionsListResponse';
-import arg from 'arg';
 import * as Log from './log';
 import { getAllReactedItems } from '../api/slack/reactions';
 import { retrieveAllUser } from '../api/user';
-import { invalidOptionText } from './messages';
-import { parseOptions } from './parser';
-import { ProgressCallback } from '../types';
-
-function parseArgs(argv?: string[]) {
-  try {
-    return arg(
-      {
-        // Types
-        '--start-date': String,
-        '--end-date': String,
-        '--channel-name': String,
-        '--channel-id': String,
-        '--reactions': String,
-        '--dry-run': Boolean,
-        '--as-user': Boolean,
-        '--no-mention': Boolean,
-        '--debug': Boolean,
-      },
-      { argv }
-    );
-  } catch (e: any) {
-    if (e.code === 'ARG_UNKNOWN_OPTION') {
-      Log.error(invalidOptionText);
-    } else {
-      Log.error(e);
-    }
-    Log.error('TODO');
-    return null;
-  }
-}
+import { ProgressCallback, SlackDemoOptions } from '../types';
+import shuffle from 'just-shuffle';
 
 export const aggregateUniqItemsReactedByMembers = async (
-  argv: string[] | undefined,
+  options: SlackDemoOptions,
   progress?: ProgressCallback
 ) => {
-  const args = parseArgs(argv);
-  if (args === null) return;
-
-  const options = parseOptions(args);
-  if (!options.endDate) options.endDate = new Date();
-  if (!options.startDate) {
-    options.startDate = options.endDate;
-    options.startDate?.setMonth(options.endDate!.getMonth() - 1);
-  }
-
-  const users = (await retrieveAllUser()).filter(
-    (u) =>
-      !u.is_bot &&
-      !u.deleted &&
-      !u.is_restricted &&
-      !u.is_ultra_restricted &&
-      !u.is_workflow_bot
+  const users = shuffle(
+    (await retrieveAllUser()).filter(
+      (u) =>
+        (!u.is_bot ||
+          (options.includeBotIds ?? '').split(',').some((id) => u.id === id)) &&
+        !u.deleted &&
+        !u.is_restricted &&
+        !u.is_ultra_restricted &&
+        !u.is_workflow_bot
+    )
   );
   progress?.({
     percent: 0,
