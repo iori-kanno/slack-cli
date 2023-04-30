@@ -8,11 +8,14 @@ module.exports = {
 
   mode: 'development',
 
-  entry: './src/entry.ts',
+  entry: {
+    'slack-cli': './src/entry.ts',
+    'slash-command': './src/slash-commands/index.ts',
+  },
 
   output: {
     clean: true,
-    filename: 'slack-cli.js',
+    filename: '[name].bundle.js',
     path: `${__dirname}/dist`,
   },
 
