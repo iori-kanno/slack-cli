@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "dayjs": "1.11.6",
+    "google-spreadsheet": "3.3.0",
     "gpt-3-encoder": "1.1.4",
     "just-order-by": "1.0.0",
     "just-shuffle": "4.2.0",
@@ -28,6 +29,7 @@
     "@slack/bolt": "3.13.0",
     "@slack/web-api": "6.7.2",
     "@types/configstore": "6.0.0",
+    "@types/google-spreadsheet": "3.3.0",
     "@typescript-eslint/eslint-plugin": "5.41.0",
     "@typescript-eslint/parser": "5.41.0",
     "arg": "5.0.2",

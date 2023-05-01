@@ -5,7 +5,7 @@ type Progress = {
   /** 0-100 */
   percent: number;
 };
-type ProgressCallback = (progress: Progress) => void;
+export type ProgressCallback = (progress: Progress) => void;
 
 export type Commands = { [command: string]: CliExecFn };
 export type ExecOptions = {
@@ -27,10 +27,12 @@ export type CliExecFn = (
   argv?: string[],
   progress?: ProgressCallback
 ) => Promise<Response> | Response;
+
 export type SlackDemoOptions = {
   asBot?: boolean;
   dryRun?: boolean;
   noMention?: boolean;
   startDate?: Date;
   endDate?: Date;
+  includeBotIds?: string;
 };

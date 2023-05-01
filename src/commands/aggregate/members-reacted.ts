@@ -9,6 +9,7 @@ import groupBy from 'just-group-by';
 import { aggregateUniqItemsReactedByMembers } from '../../lib/aggregator';
 import { parseOptions } from '../../lib/parser';
 import { parseReactions } from './utils/reactions-parser';
+import { buildSheetMembersReacted } from './utils/build-sheet';
 
 const helpText = `
 Command:
@@ -72,7 +73,7 @@ interface ReactionDictionary {
   [id: string]: MemberDictionary;
 }
 
-export const exec: CliExecFn = async (argv) => {
+export const exec: CliExecFn = async (argv, progress) => {
   const args = parseArgs(argv);
   if (args === null) return;
 
@@ -92,22 +93,13 @@ export const exec: CliExecFn = async (argv) => {
     }
   }
 
-  const targetItems = (await aggregateUniqItemsReactedByMembers(argv)) || [];
+  const targetItems =
+    (await aggregateUniqItemsReactedByMembers(options, progress)) || [];
   const { targetReactions, singleReactions, categorizedReactions } =
     parseReactions(args['--reactions']);
 
-  const users = (await retrieveAllUser()).filter(
-    (u) =>
-      !u.is_bot &&
-      !u.deleted &&
-      !u.is_restricted &&
-      !u.is_ultra_restricted &&
-      !u.is_workflow_bot
-  );
-  const memberIds = users
-    .map(({ id }) => id)
-    .filter((id): id is string => typeof id == 'string');
-  // ここから実装
+  const users = await retrieveAllUser(options);
+
   // uniq items からユーザー毎のターゲットリアクションを集計する
   // 投稿者のIDと得られたリアクションの辞書
   const skinToneRegex = /::skin-tone-\d/;
@@ -117,6 +109,8 @@ export const exec: CliExecFn = async (argv) => {
   }
 
   for (const item of targetItems) {
+    // 投稿者がユーザー一覧に含まれていないなら集計しない
+    if (!users.some((u) => u.id === item.message?.user)) continue;
     // 集計対象を整形
     const reactions =
       item.message?.reactions?.map((r) => ({
@@ -130,7 +124,10 @@ export const exec: CliExecFn = async (argv) => {
     for (const reaction of reactions) {
       if (!targetReactions.includes(reaction.name)) continue;
       const rDict = reactionNameToReactedMemberDict[reaction.name];
-      for (const user of reaction.users) {
+      // リアクションをつけたユーザーの内、集計対象者だけ集計
+      for (const user of reaction.users.filter((uid) =>
+        users.some((u) => u.id === uid)
+      )) {
         // 自身の投稿へのリアクションなら集計しない
         if (item.message?.user === user) continue;
         rDict[user] = (rDict[user] ?? 0) + 1;
@@ -138,8 +135,19 @@ export const exec: CliExecFn = async (argv) => {
     }
   }
 
+  let url: string | undefined;
+  if (process.env.GOOGLE_SPREADSHEET_ID) {
+    url = await buildSheetMembersReacted(
+      {
+        sheetId: process.env.GOOGLE_SPREADSHEET_ID,
+        command: `aggregate:members-reacted ${(argv ?? []).join(' ')}`,
+        dict: reactionNameToReactedMemberDict,
+      },
+      options
+    );
+  }
+
   if (categorizedReactions.length > 0) {
-    Log.debug(categorizedReactions);
     for (const reactionNames of categorizedReactions) {
       // 後で表示する際にそのまま使える形で key にする
       // そのため、最初と最後の : が不要（ aa::bb::cc となる）
@@ -202,6 +210,7 @@ export const exec: CliExecFn = async (argv) => {
       .join('\n')}`;
     blocks.push(text);
   }
+  if (url) blocks.push(`\n<${url}|全ての集計結果はこちら>`);
 
   if (args['--dry-run']) {
     Log.success(blocks);

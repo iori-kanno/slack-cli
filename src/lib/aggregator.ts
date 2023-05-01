@@ -1,66 +1,29 @@
 import { Item } from '@slack/web-api/dist/response/ReactionsListResponse';
-import arg from 'arg';
 import * as Log from './log';
 import { getAllReactedItems } from '../api/slack/reactions';
 import { retrieveAllUser } from '../api/user';
-import { invalidOptionText } from './messages';
-import { parseOptions } from './parser';
-
-function parseArgs(argv?: string[]) {
-  try {
-    return arg(
-      {
-        // Types
-        '--start-date': String,
-        '--end-date': String,
-        '--channel-name': String,
-        '--channel-id': String,
-        '--reactions': String,
-        '--dry-run': Boolean,
-        '--as-user': Boolean,
-        '--no-mention': Boolean,
-        '--debug': Boolean,
-      },
-      { argv }
-    );
-  } catch (e: any) {
-    if (e.code === 'ARG_UNKNOWN_OPTION') {
-      Log.error(invalidOptionText);
-    } else {
-      Log.error(e);
-    }
-    Log.error('TODO');
-    return null;
-  }
-}
+import { ProgressCallback, SlackDemoOptions } from '../types';
+import shuffle from 'just-shuffle';
 
 export const aggregateUniqItemsReactedByMembers = async (
-  argv: string[] | undefined
+  options: SlackDemoOptions,
+  progress?: ProgressCallback
 ) => {
-  const args = parseArgs(argv);
-  if (args === null) return;
-
-  const options = parseOptions(args);
-  if (!options.endDate) options.endDate = new Date();
-  if (!options.startDate) {
-    options.startDate = options.endDate;
-    options.startDate?.setMonth(options.endDate!.getMonth() - 1);
-  }
-
-  const users = (await retrieveAllUser()).filter(
-    (u) =>
-      !u.is_bot &&
-      !u.deleted &&
-      !u.is_restricted &&
-      !u.is_ultra_restricted &&
-      !u.is_workflow_bot
-  );
+  const users = shuffle(await retrieveAllUser(options));
+  progress?.({
+    percent: 0,
+    message: `${users.length}人分のリアクション履歴を取得します`,
+  });
 
   let items: Item[] = [];
-  for (const member of users) {
+  for (const [index, member] of users.entries()) {
     items.push(
       ...(await getAllReactedItems({ user: member?.id, limit: 500 }, options))
     );
+    progress?.({
+      percent: ((index + 1) / users.length) * 100,
+      message: `${member?.name}のリアクション履歴を取得しました`,
+    });
   }
   Log.debug(`集計対象投稿数（重複含む）: ${items.length}`);
 

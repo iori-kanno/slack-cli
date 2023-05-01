@@ -3,16 +3,15 @@ import { invalidOptionText } from '../../lib/messages';
 import { CliExecFn } from '../../types';
 import * as Log from '../../lib/log';
 import { retrieveAllUser } from '../../api/user';
-import { getAllReactedItems } from '../../api/slack/reactions';
 import { aggregateReactionsForEachMember } from '../../api/reaction';
-import { Item } from '@slack/web-api/dist/response/ReactionsListResponse';
 import { postMessageToSlack } from '../../api/slack/chat';
 import { getAllChannels } from '../../api/slack/channel';
 import { Channel } from '@slack/web-api/dist/response/ChannelsListResponse';
 import groupBy from 'just-group-by';
 import { parseOptions } from '../../lib/parser';
-import shuffle from 'just-shuffle';
 import { parseReactions } from './utils/reactions-parser';
+import { aggregateUniqItemsReactedByMembers } from '../../lib/aggregator';
+import { buildSheetReactions } from './utils/build-sheet';
 
 const helpText = `
 Command:
@@ -78,13 +77,6 @@ export const exec: CliExecFn = async (argv, progress) => {
     return { text: helpText };
   }
   const options = parseOptions(args);
-
-  if (!options.endDate) options.endDate = new Date();
-  if (!options.startDate) {
-    options.startDate = options.endDate;
-    options.startDate?.setMonth(options.endDate!.getMonth() - 1);
-  }
-
   const { targetReactions, singleReactions, categorizedReactions } =
     parseReactions(args['--reactions']);
 
@@ -100,47 +92,19 @@ export const exec: CliExecFn = async (argv, progress) => {
     }
   }
 
-  const users = shuffle(
-    (await retrieveAllUser()).filter(
-      (u) =>
-        (!u.is_bot ||
-          (args['--include-bot-ids'] ?? '')
-            .split(',')
-            .some((id) => u.id === id)) &&
-        !u.deleted &&
-        !u.is_restricted &&
-        !u.is_ultra_restricted &&
-        !u.is_workflow_bot
-    )
-  );
-  progress?.({
-    percent: 0,
-    message: `${users.length}人分のリアクション履歴を取得します`,
-  });
+  const users = await retrieveAllUser(options);
+  const items =
+    (await aggregateUniqItemsReactedByMembers(options, progress)) || [];
 
-  let items: Item[] = [];
-  for (const [index, member] of users.entries()) {
-    items.push(
-      ...(await getAllReactedItems({ user: member?.id, limit: 500 }, options))
-    );
-    progress?.({
-      percent: ((index + 1) / users.length) * 100,
-      message: `${member?.name}のリアクション履歴を取得しました`,
-    });
-  }
-  Log.debug(`集計対象投稿数（重複含む）: ${items.length}`);
-
-  const reactionNameToCount = Object.entries(
+  const allReactionNameToCount = Object.entries(
     aggregateReactionsForEachMember(items, users)
   )
     .flatMap(([memberId, rDict]) =>
-      Object.entries(rDict)
-        .filter(([reactionName]) => targetReactions.includes(reactionName))
-        .map(([reactionName, count]) => ({
-          key: reactionName,
-          memberId,
-          count,
-        }))
+      Object.entries(rDict).map(([reactionName, count]) => ({
+        key: reactionName,
+        memberId,
+        count,
+      }))
     )
     .reduce((acc, v) => {
       const elm = { mid: v.memberId, count: v.count };
@@ -148,8 +112,29 @@ export const exec: CliExecFn = async (argv, progress) => {
       return acc;
     }, new Map<string, Array<{ mid: string; count: number }>>());
 
+  let url: string | undefined;
+  if (process.env.GOOGLE_SPREADSHEET_ID) {
+    url = await buildSheetReactions(
+      {
+        sheetId: process.env.GOOGLE_SPREADSHEET_ID,
+        command: `aggregate:reactions ${(argv ?? []).join(' ')}`,
+        targetReactions,
+        dict: allReactionNameToCount,
+      },
+      options
+    );
+  }
+
+  const targetReactionNameToCount = new Map<
+    string,
+    Array<{ mid: string; count: number }>
+  >();
+  for (const [reactionName, nameToCount] of allReactionNameToCount) {
+    if (!targetReactions.includes(reactionName)) continue;
+    targetReactionNameToCount.set(reactionName, nameToCount);
+  }
+
   if (categorizedReactions.length > 0) {
-    Log.debug(categorizedReactions);
     for (const reactionNames of categorizedReactions) {
       // 後で表示する際にそのまま使える形で key にする
       // そのため、最初と最後の : が不要（ aa::bb::cc となる）
@@ -157,10 +142,10 @@ export const exec: CliExecFn = async (argv, progress) => {
         .map((r, i) => `${i !== 0 ? ':' : ''}${r}`)
         .join(':');
       const categorizedValue = Array<{ mid: string; count: number }>();
-      reactionNameToCount.set(key, categorizedValue);
+      targetReactionNameToCount.set(key, categorizedValue);
 
       for (const nameToCount of reactionNames.map(
-        (name) => reactionNameToCount.get(name) ?? []
+        (name) => targetReactionNameToCount.get(name) ?? []
       )) {
         // 全メンバーのまとめる対象の count を合計する
         for (const v of nameToCount) {
@@ -176,11 +161,11 @@ export const exec: CliExecFn = async (argv, progress) => {
     // single で指定されていないものを削除する
     targetReactions
       .filter((r) => !singleReactions.includes(r))
-      .forEach((r) => reactionNameToCount.delete(r));
+      .forEach((r) => targetReactionNameToCount.delete(r));
   }
 
   const blocks: string[] = [];
-  const keys = [...reactionNameToCount.keys()];
+  const keys = [...targetReactionNameToCount.keys()];
   for (const key of keys.sort(
     (a, b) =>
       // 与えられた入力順で出力できるようにソートする
@@ -188,7 +173,10 @@ export const exec: CliExecFn = async (argv, progress) => {
       targetReactions.findIndex((r) => r === b)
   )) {
     // 同じ獲得数でまとめる
-    const candidates = groupBy(reactionNameToCount.get(key)!, (c) => c.count);
+    const candidates = groupBy(
+      targetReactionNameToCount.get(key)!,
+      (c) => c.count
+    );
     if (Object.keys(candidates).length === 0) {
       blocks.push(`:${key}: を獲得した人はいませんでした。`);
       continue;
@@ -217,6 +205,7 @@ export const exec: CliExecFn = async (argv, progress) => {
       .filter((r) => ![...keys].includes(r))
       .map((r) => `:${r}: を獲得した人はいませんでした。`)
   );
+  if (url) blocks.push(`\n<${url}|全ての集計結果はこちら>`);
 
   if (args['--dry-run']) {
     Log.success(blocks);

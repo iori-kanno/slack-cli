@@ -11,18 +11,21 @@ https://api.slack.com/ にて作成して設定してください。
 
 また、必要に応じて `SLACK_TEAM_ID` も設定することができます。
 
-| 環境変数名           | 必須 | 用途                                                                       |
-| :------------------- | :--: | :------------------------------------------------------------------------- |
-| SLACK_BOT_TOKEN      |  ⭕  | ボットトークン。Slack API を利用するために必須。                           |
-| SLACK_TOKEN          |  ⭕  | ユーザートークン。Slack API をユーザーとして利用する際に利用。             |
-| SLACK_TEAM_ID        |  ❌  | Slack の team_id。設定したトークンが複数チームに所属している場合指定する。 |
-| SLACK_SIGNING_SECRET |  🔺  | Slash Command として BOT を起動させる場合必須。                            |
-| OPENAI_API_KEY       |  ❌  | OpenAI の apiKey。summarize 関連のコマンドを使用する際に必須。             |
-| OPENAI_API_BASE      |  ❌  | OpenAI の basePath。sumamrize 関連のコマンドを使用する際に必須。           |
-| OPENAI_MODEL         |  ❌  | OpenAI の model。デフォルトは 'text-davinci-003'                           |
-| OPENAI_API_VERSION   |  ❌  | OpenAI の api-version。デフォルトは '2022-12-01'                           |
+| 環境変数名            | 必須 | 用途                                                                               |
+| :-------------------- | :--: | :--------------------------------------------------------------------------------- |
+| SLACK_BOT_TOKEN       |  ⭕  | ボットトークン。Slack API を利用するために必須。                                   |
+| SLACK_TOKEN           |  ⭕  | ユーザートークン。Slack API をユーザーとして利用する際に利用。                     |
+| SLACK_TEAM_ID         |  ❌  | Slack の team_id。設定したトークンが複数チームに所属している場合指定する。         |
+| SLACK_SIGNING_SECRET  |  🔺  | Slash Command として BOT を起動させる場合必須。                                    |
+| OPENAI_API_KEY        |  ❌  | OpenAI の apiKey。summarize 関連のコマンドを使用する際に必須。                     |
+| OPENAI_API_BASE       |  ❌  | OpenAI の basePath。sumamrize 関連のコマンドを使用する際に必須。                   |
+| OPENAI_MODEL          |  ❌  | OpenAI の model。デフォルトは 'text-davinci-003'                                   |
+| OPENAI_API_VERSION    |  ❌  | OpenAI の api-version。デフォルトは '2022-12-01'                                   |
+| GOOGLE_SPREADSHEET_ID |  ❌  | GoogleSpreadsheet の ID。aggregate コマンドの取得結果を出力する場合に利用。（＊1） |
 
 現状 SLACK_TOKEN も必須となってしまっているのでユーザートークンを使わない場合は SLACK_BOT_TOKEN と同じものを設定してください。
+
+（＊1）使用する場合 project root にスプレッドシートの利用権限が付与されている `.spreadsheet-credential.json` も必要。また、 `GOOGLE_SPREADSHEET_ID` で指定したスプレッドシートの編集権限が付いている必要がある。
 
 ### Slack の必要な権限
 
