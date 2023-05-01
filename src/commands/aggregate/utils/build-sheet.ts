@@ -28,6 +28,43 @@ const setSlackEmojiToHeaders = async (
   return sheet.setHeaderRow(['user', ...headers]);
 };
 
+const updateProperties = async (
+  sheet: GoogleSpreadsheetWorksheet,
+  headers: string[]
+) => {
+  const common = {
+    hiddenByUser: false,
+    hiddenByFilter: false,
+    developerMetadata: [],
+  };
+  return Promise.all([
+    sheet.updateDimensionProperties(
+      'ROWS',
+      {
+        ...common,
+        pixelSize: 30,
+      },
+      { startIndex: 0, endIndex: 1 }
+    ),
+    sheet.updateDimensionProperties(
+      'COLUMNS',
+      {
+        ...common,
+        pixelSize: 200,
+      },
+      { startIndex: 0, endIndex: 1 }
+    ),
+    sheet.updateDimensionProperties(
+      'COLUMNS',
+      {
+        ...common,
+        pixelSize: 40,
+      },
+      { startIndex: 1, endIndex: headers.length }
+    ),
+  ]).then(() => void 0);
+};
+
 const mapSystemEmoji = (reactions: string[]): string[] => {
   try {
     // システム組み込みの絵文字は slack api からは取れないので自前で用意している
@@ -114,7 +151,10 @@ export const buildSheetReactions = async (
       command,
       headers,
       rows,
-      adjust: async (sheet) => setSlackEmojiToHeaders(sheet, replacedReactions),
+      adjust: async (sheet) => {
+        await setSlackEmojiToHeaders(sheet, replacedReactions);
+        return updateProperties(sheet, headers);
+      },
     });
   } catch (e) {
     Log.error(`buildSheetReactions Error: ${e}`);
@@ -185,7 +225,10 @@ export const buildSheetMembersReacted = async (
       command,
       headers,
       rows,
-      adjust: async (sheet) => setSlackEmojiToHeaders(sheet, replacedReactions),
+      adjust: async (sheet) => {
+        await setSlackEmojiToHeaders(sheet, replacedReactions);
+        return updateProperties(sheet, headers);
+      },
     });
   } catch (e) {
     Log.error(`buildSheetMembersReacted Error: ${e}`);
