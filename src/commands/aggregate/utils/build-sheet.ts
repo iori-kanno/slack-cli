@@ -30,14 +30,15 @@ const setSlackEmojiToHeaders = async (
 
 const updateProperties = async (
   sheet: GoogleSpreadsheetWorksheet,
-  headers: string[]
+  columnCount: number,
+  rowCount: number
 ) => {
   const common = {
     hiddenByUser: false,
     hiddenByFilter: false,
     developerMetadata: [],
   };
-  return Promise.all([
+  await Promise.all([
     sheet.updateDimensionProperties(
       'ROWS',
       {
@@ -60,9 +61,16 @@ const updateProperties = async (
         ...common,
         pixelSize: 40,
       },
-      { startIndex: 1, endIndex: headers.length }
+      { startIndex: 1, endIndex: columnCount }
     ),
-  ]).then(() => void 0);
+  ]);
+  // セルを固定する。row は 1行目にコマンドを表示しているので 2行目から固定する
+  return sheet.resize({
+    columnCount,
+    rowCount,
+    frozenColumnCount: 1,
+    frozenRowCount: 2,
+  });
 };
 
 const mapSystemEmoji = (reactions: string[]): string[] => {
@@ -153,7 +161,7 @@ export const buildSheetReactions = async (
       rows,
       adjust: async (sheet) => {
         await setSlackEmojiToHeaders(sheet, replacedReactions);
-        return updateProperties(sheet, headers);
+        return updateProperties(sheet, headers.length, rows.length + 2);
       },
     });
   } catch (e) {
@@ -227,7 +235,7 @@ export const buildSheetMembersReacted = async (
       rows,
       adjust: async (sheet) => {
         await setSlackEmojiToHeaders(sheet, replacedReactions);
-        return updateProperties(sheet, headers);
+        return updateProperties(sheet, headers.length, rows.length + 2);
       },
     });
   } catch (e) {
