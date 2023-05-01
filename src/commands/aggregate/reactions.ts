@@ -11,6 +11,7 @@ import groupBy from 'just-group-by';
 import { parseOptions } from '../../lib/parser';
 import { parseReactions } from './utils/reactions-parser';
 import { aggregateUniqItemsReactedByMembers } from '../../lib/aggregator';
+import { buildSheetReactions } from './utils/build-sheet';
 
 const helpText = `
 Command:
@@ -111,6 +112,19 @@ export const exec: CliExecFn = async (argv, progress) => {
       return acc;
     }, new Map<string, Array<{ mid: string; count: number }>>());
 
+  let url: string | undefined;
+  if (process.env.GOOGLE_SPREADSHEET_ID) {
+    url = await buildSheetReactions(
+      {
+        sheetId: process.env.GOOGLE_SPREADSHEET_ID,
+        command: `aggregate:reactions ${(argv ?? []).join(' ')}`,
+        targetReactions,
+        dict: allReactionNameToCount,
+      },
+      options
+    );
+  }
+
   const targetReactionNameToCount = new Map<
     string,
     Array<{ mid: string; count: number }>
@@ -121,7 +135,6 @@ export const exec: CliExecFn = async (argv, progress) => {
   }
 
   if (categorizedReactions.length > 0) {
-    Log.debug(categorizedReactions);
     for (const reactionNames of categorizedReactions) {
       // 後で表示する際にそのまま使える形で key にする
       // そのため、最初と最後の : が不要（ aa::bb::cc となる）
@@ -192,6 +205,7 @@ export const exec: CliExecFn = async (argv, progress) => {
       .filter((r) => ![...keys].includes(r))
       .map((r) => `:${r}: を獲得した人はいませんでした。`)
   );
+  if (url) blocks.push(`\n<${url}|全ての集計結果はこちら>`);
 
   if (args['--dry-run']) {
     Log.success(blocks);
