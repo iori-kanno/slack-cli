@@ -87,5 +87,5 @@ export const exec: CliExecFn = async (argv) => {
     Log.success(response);
     return;
   }
-  return { text: '```' + response + '```' };
+  return { text: '```\n' + response + '\n```' };
 };
