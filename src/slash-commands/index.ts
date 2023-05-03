@@ -112,17 +112,17 @@ import { handleMonitoring } from './monitoring';
           });
           return;
         }
-        if (res?.text) {
-          await customRespond({
-            text: `${resumeLogText}\n${res.text}`,
-          });
-        } else if (res?.postArg) {
+        if (res?.postArg) {
           const args = res.postArg;
           await customRespond({
             text: `${resumeLogText}\n${
               res.asUser ? '`--as-user` not in service\n' : ''
             }${res.text ?? ''}`,
             ...args,
+          });
+        } else if (res?.text) {
+          await customRespond({
+            text: `${resumeLogText}\n${res.text}`,
           });
         }
       } catch (e) {
