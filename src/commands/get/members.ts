@@ -9,18 +9,20 @@ import { retrieveInfoForArgs } from '../../lib/arguments';
 import { Member } from '@slack/web-api/dist/response/UsersListResponse';
 
 const helpText = `
+\`\`\`
 Command:
-  slack-cli get:members  Slackに参加しているメンバー一覧を出力する。チャンネルを指定するとそのチャンネルに参加しているメンバーのみを出力する。
+  get:members  Slackに参加しているメンバー一覧を出力する。チャンネルを指定するとそのチャンネルに参加しているメンバーのみを出力する。
 
 Usage:
   slack-cli get:members [options]
 
 Options:
-  --channel-id      投稿先チャンネルID
-  --channel-name    投稿先チャンネル名
+  --channel-id      対象チャンネルID
+  --channel-name    対象チャンネル名
   --debug           指定した場合デバッグログを出力する
   --help, -h        このヘルプを表示
   TODO: 指定したチャンネルに投稿できるようにする
+\`\`\`
 `;
 
 function parseArgs(argv?: string[]) {
@@ -51,7 +53,7 @@ function parseArgs(argv?: string[]) {
 
 export const exec: CliExecFn = async (argv) => {
   const args = parseArgs(argv);
-  if (args === null) return;
+  if (args === null) return { error: invalidOptionText + '\n' + helpText };
 
   if (args['--help']) {
     Log.success(helpText);
@@ -85,5 +87,5 @@ export const exec: CliExecFn = async (argv) => {
     Log.success(response);
     return;
   }
-  return { text: response };
+  return { text: '```' + response + '```' };
 };

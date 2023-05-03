@@ -3,7 +3,6 @@ import { invalidOptionText } from '../../lib/messages';
 import { CliExecFn } from '../../types';
 import * as Log from '../../lib/log';
 import { getAllConversations } from '../../api/slack/conversations';
-import { postMessageToSlack } from '../../api/slack/chat';
 import { parseOptions } from '../../lib/parser';
 import { retrieveInfoForArgs } from '../../lib/arguments';
 import { summarizeChannel } from '../../api/gpt/summarize/channel';
@@ -11,22 +10,24 @@ import { replaceMemberIdToNameInTexts } from '../../lib/helper';
 import { validate } from '../../api/gpt';
 
 const helpText = `
+\`\`\`
 Command:
-  slack-cli summarize:channel    指定されたチャンネルの直近の投稿をGPTで要約する
-  * 環境変数に OPENAI_API_KEY, OPENAI_API_BASE の設定が必要。
-  * このコマンドは、チャンネルの投稿を全て取得してから要約を行うため、取得する投稿数が多い場合は時間がかかる。
+  summarize:channel    指定されたチャンネルの直近の投稿をGPTで要約する
+    * 環境変数に OPENAI_API_KEY, OPENAI_API_BASE の設定が必要。
+    * このコマンドは、チャンネルの投稿を全て取得してから要約を行うため、取得する投稿数が多い場合は時間がかかる。
 
 Usage:
   slack-cli summarize:channel --channel-name aaa [options]
 
 Options:
-  --channel-id      集計対象チャンネルID。--channel-id or --channel-name が必須。
-  --channel-name    集計対象チャンネル名。--channel-id or --channel-name が必須。
+  --channel-id      集計対象チャンネルID。slash-command 以外では --channel-id or --channel-name が必須。
+  --channel-name    集計対象チャンネル名。slash-command 以外では --channel-id or --channel-name が必須。
   --limit           取得する投稿数。デフォルトは 500件（スレッドの投稿を取得する都合上大幅に超えてしまうこともある）
   --as-user         BOT のトークンを利用せず、ユーザートークンを利用してリクエストを行う。デフォルト false
 
   --help, -h        このヘルプを表示
   --dry-run         投稿はせずに投稿内容をログ出力する
+\`\`\`
 `;
 
 function parseArgs(argv?: string[]) {
@@ -60,7 +61,7 @@ function parseArgs(argv?: string[]) {
 
 export const exec: CliExecFn = async (argv, progress) => {
   const args = parseArgs(argv);
-  if (args === null) return;
+  if (args === null) return { error: invalidOptionText + '\n' + helpText };
 
   if (args['--help']) {
     return { text: helpText };
@@ -105,23 +106,21 @@ export const exec: CliExecFn = async (argv, progress) => {
   try {
     const response = await summarizeChannel(targetText);
 
-    const text = `#${channel?.name} 内の直近 ${
-      targetMessages.length
-    }件の投稿（内スレッド ${
+    const text = `直近 ${targetMessages.length}件の投稿（内スレッド ${
       targetMessages.filter((m) => m.thread_ts && !m.reply_count).length
-    }件）から、チャンネルのトピックについて要約しました。\n${response
+    }件）から、チャンネルのトピックについて要約しました。\n\`\`\`\n${response
       .split('\n')
       .filter((s) => s !== '')
       .map((s) => '・' + s.replace(/(\t| )+/, ''))
-      .join('\n')}`;
+      .join('\n')}\n\`\`\``;
     if (args['--dry-run']) {
       Log.success(text);
       return;
     }
     return {
       asUser: !options.asBot,
-      postArg: { channel: channel!.id!, text },
-      text,
+      postArg: { channel: channel.id!, text: `<#${channel.id}> 内の${text}` },
+      text: `#${channel.name} 内の${text}`,
     };
   } catch (e) {
     Log.error(e);

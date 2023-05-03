@@ -44,7 +44,7 @@ function parseArgs(argv?: string[]) {
 
 export const exec: CliExecFn = async (argv) => {
   const args = parseArgs(argv);
-  if (args === null) return;
+  if (args === null) return { error: invalidOptionText + '\n' + helpText };
 
   if (args['--help']) {
     return { text: helpText };

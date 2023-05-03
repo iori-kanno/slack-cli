@@ -8,8 +8,9 @@ import orderBy from 'just-order-by';
 import { Channel } from '@slack/web-api/dist/response/ChannelsListResponse';
 
 const helpText = `
+\`\`\`
 Command:
-  slack-cli get:channels  チャンネル一覧を出力する。オプションで各種フィルターやソートが使える。
+  get:channels  チャンネル一覧を出力する。オプションで各種フィルターやソートが使える。
 
 Usage:
   slack-cli get:channels [options]
@@ -31,6 +32,7 @@ Options:
   --help, -h        このヘルプを表示
   TODO: 指定したチャンネルに投稿できるようにする
   --dry-run         投稿はせずに投稿内容をログ出力する
+\`\`\`
 `;
 
 function parseArgs(argv?: string[]) {
@@ -71,7 +73,7 @@ function parseArgs(argv?: string[]) {
 
 export const exec: CliExecFn = async (argv) => {
   const args = parseArgs(argv);
-  if (args === null) return;
+  if (args === null) return { error: invalidOptionText + '\n' + helpText };
 
   if (args['--help']) {
     Log.success(helpText);
@@ -183,7 +185,7 @@ export const exec: CliExecFn = async (argv) => {
     return;
   }
 
-  return { text: response };
+  return { text: '```' + response + '```' };
 };
 
 const additionalInfo = (c: Channel, numOfDigits: number) => {

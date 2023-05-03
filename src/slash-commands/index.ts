@@ -108,7 +108,7 @@ import { handleMonitoring } from './monitoring';
 
         if (res?.error) {
           await customRespond({
-            text: `${resumeLogText}\nError: ${res.error}`,
+            text: `${resumeLogText}\n*Error*: ${res.error}`,
           });
           return;
         }

@@ -6,16 +6,17 @@ import { parseOptions, parseSlackUrl } from '../../lib/parser';
 import { deleteMessage } from '../../api/slack/chat';
 
 const helpText = `
+\`\`\`
 Command:
-  slack-cli delete:message  BOTが自分で投稿したメッセージを削除する
+  delete:message  url   BOTが自分で投稿したメッセージを削除する
 
 Usage:
-  slack-cli delete:message --url https://xxx
+  slack-cli delete:message https://xxxx.slack.com/xxx [options]
 
 Options:
-  --url        消したい投稿のURL
   --help, -h   このヘルプを表示
   --debug      デバッグモードで実行
+\`\`\`
 `;
 
 function parseArgs(argv?: string[]) {
@@ -23,7 +24,6 @@ function parseArgs(argv?: string[]) {
     return arg(
       {
         // Types
-        '--url': String,
         '--help': Boolean,
         '--debug': Boolean,
 
@@ -44,20 +44,19 @@ function parseArgs(argv?: string[]) {
 }
 
 export const exec: CliExecFn = async (argv) => {
+  const error = { error: invalidOptionText + '\n' + helpText };
+  if (!argv || argv.length === 0) return error;
+  const url = argv[0];
   const args = parseArgs(argv);
-  if (args === null) return;
+  if (args === null) return error;
 
   if (args['--help']) {
     Log.success(helpText);
     return { text: helpText };
   }
-  if (!args['--url']) {
-    Log.error('--url を指定してください');
-    return { error: '--url を指定してください', text: helpText };
-  }
 
   const options = parseOptions(args);
-  const { channel, ts } = parseSlackUrl(args['--url']);
+  const { channel, ts } = parseSlackUrl(url);
 
   if (!channel || !ts) {
     Log.error('不正なURLです');
@@ -67,5 +66,5 @@ export const exec: CliExecFn = async (argv) => {
   const response = await deleteMessage({ channel, ts }, options);
 
   Log.success(response);
-  return { text: `削除しました` };
+  return { text: `投稿を削除しました` };
 };
