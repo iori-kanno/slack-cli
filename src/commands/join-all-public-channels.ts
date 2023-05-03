@@ -11,8 +11,9 @@ import { parseOptions } from '../lib/parser';
 import { fetchMe } from '../api/slack/auth';
 
 const helpText = `
+\`\`\`
 Command:
-  slack-cli join:public-channels  BOT が参加していないパブリックチャンネルにユーザーを先に参加させてから BOT を招待することで参加させる
+  join:public-channels    BOT が参加していないパブリックチャンネルにユーザーを先に参加させてから BOT を招待することで参加させる
 
 Usage:
   slack-cli join:public-channels [options]
@@ -21,6 +22,7 @@ Options:
   --help, -h        このヘルプを表示
   --debug           デバッグモードで実行する
   --dry-run         処理はせずに新規参加するチャンネルをログ出力する
+\`\`\`
 `;
 
 function parseArgs(argv?: string[]) {
@@ -50,7 +52,7 @@ function parseArgs(argv?: string[]) {
 
 export const exec: CliExecFn = async (argv) => {
   const args = parseArgs(argv);
-  if (args === null) return;
+  if (args === null) return { error: invalidOptionText + '\n' + helpText };
 
   if (args['--help']) {
     Log.success(helpText);

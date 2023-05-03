@@ -30,7 +30,7 @@ const member = async (
     members.find(
       (m) =>
         m.id === id ||
-        [m.name, m.real_name]
+        [m.name?.toLocaleLowerCase(), m.real_name]
           .filter((n) => n)
           .join(',')
           .includes(fuzzyName?.toLocaleLowerCase() || '')

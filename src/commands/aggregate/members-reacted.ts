@@ -12,17 +12,18 @@ import { parseReactions } from './utils/reactions-parser';
 import { buildSheetMembersReacted } from './utils/build-sheet';
 
 const helpText = `
+\`\`\`
 Command:
-  slack-cli aggregate:members-reacted  指定された期間内に指定されたリアクションを行った回数をユーザー毎に集計してX名リストアップする
+  aggregate:members-reacted  指定された期間内に指定されたリアクションを行った回数をユーザー毎に集計して5位までをリストアップする
 
 Usage:
   slack-cli aggregate:members-reacted [options]
 
 Options:
-  --channel-id      投稿先チャンネルID。--channel-id or --channel-name が必須。
-  --channel-name    投稿先チャンネル名。--channel-id or --channel-name が必須。
-  --start-date      集計対象の期間の開始日時。指定例: '2022-12-01T00:00:00'
-  --end-date        集計対象の期間の終了日時。指定例: '2022-12-01T00:00:00'
+  --channel-id      投稿先チャンネルID。slash-command 以外では --channel-id or --channel-name が必須。
+  --channel-name    投稿先チャンネル名。slash-command 以外では --channel-id or --channel-name が必須。
+  --start-date      集計対象の期間の開始日時。指定例: '2022-12-01' 指定がない場合は実行日時の 1ヶ月前となる。
+  --end-date        集計対象の期間の終了日時。指定例: '2022-12-01' 指定がない場合は実行日時となる。
   --reactions       集計対象のリアクション文字列。カンマ区切りで複数指定が可能。
                     []で括ると集計を一つにまとめることができる。デフォルト '+1,pray'
                     例）--reactions '+1,[pray,joy],heart' と指定した場合、pray と joy は集計を一つにまとめることができる
@@ -31,6 +32,7 @@ Options:
   --no-mention      投稿時にメンションしない場合にのみ指定する
   --debug           指定した場合デバッグログを出力する
   --help, -h        このヘルプを表示
+\`\`\`
 `;
 
 function parseArgs(argv?: string[]) {
@@ -75,7 +77,7 @@ interface ReactionDictionary {
 
 export const exec: CliExecFn = async (argv, progress) => {
   const args = parseArgs(argv);
-  if (args === null) return;
+  if (args === null) return { error: invalidOptionText + '\n' + helpText };
 
   if (args['--help']) {
     return { text: helpText };

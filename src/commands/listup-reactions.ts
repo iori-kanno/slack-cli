@@ -6,8 +6,9 @@ import { aggregateReactions } from '../api/reaction';
 import { parseOptions, parseSlackUrl } from '../lib/parser';
 
 const helpText = `
+\`\`\`
 Command:
-  slack-cli listup:reactions  指定された投稿に付いているリアクションを集計してスレッドに投稿する
+  listup:reactions  指定された投稿に付いているリアクションを集計してスレッドに投稿する
 
 Usage:
   slack-cli listup:reactions -url slack-url [options]
@@ -19,6 +20,7 @@ Options:
   --as-user         BOT のトークンを利用せず、ユーザートークンを利用してリクエストを行う。デフォルト false
   --dry-run         投稿はせずに投稿内容をログ出力する
   --help, -h        このヘルプを表示
+\`\`\`
 `;
 
 function parseArgs(argv?: string[]) {
@@ -54,7 +56,7 @@ function parseArgs(argv?: string[]) {
 
 export const exec: CliExecFn = async (argv) => {
   const args = parseArgs(argv);
-  if (args === null) return;
+  if (args === null) return { error: invalidOptionText + '\n' + helpText };
 
   if (args['--help']) {
     Log.success(helpText);

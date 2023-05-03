@@ -14,17 +14,18 @@ import { aggregateUniqItemsReactedByMembers } from '../../lib/aggregator';
 import { buildSheetReactions } from './utils/build-sheet';
 
 const helpText = `
+\`\`\`
 Command:
-  slack-cli aggregate:reactions    指定された期間内に指定されたリアクション数が多いユーザーを最大5名リストアップする
+  aggregate:reactions    指定された期間内に指定されたリアクション数が多いユーザーを5位までをリストアップする
 
 Usage:
   slack-cli aggregate:reactions --channel-name general [options]
 
 Options:
-  --channel-id      投稿先チャンネルID。--channel-id or --channel-name が必須（slash-commnad の場合無視される）
-  --channel-name    投稿先チャンネル名。--channel-id or --channel-name が必須（slash-command の場合無視される）
-  --start-date      集計対象の期間の開始日時。指定例: '2022-12-01T00:00:00'
-  --end-date        集計対象の期間の終了日時。指定例: '2022-12-01T00:00:00'
+  --channel-id      投稿先チャンネルID。slash-command 以外では --channel-id or --channel-name が必須。
+  --channel-name    投稿先チャンネル名。slash-command 以外では --channel-id or --channel-name が必須。
+  --start-date      集計対象の期間の開始日時。指定例: '2022-12-01' 指定がない場合は実行日時の 1ヶ月前となる。
+  --end-date        集計対象の期間の終了日時。指定例: '2022-12-01' 指定がない場合は実行日時となる。
   --reactions       集計対象のリアクション文字列。カンマ区切りで複数指定が可能。
                     []で括ると集計を一つにまとめることができる。デフォルト '+1,pray'
                     例）--reactions '+1,[pray,joy],heart' と指定した場合、pray と joy は集計を一つにまとめることができる
@@ -34,6 +35,7 @@ Options:
   --as-user         BOT のトークンを利用せず、ユーザートークンを利用してリクエストを行う。デフォルト false。cli では利用不可。
   --debug           指定した場合デバッグログを出力する
   --help, -h        このヘルプを表示
+\`\`\`
 `;
 
 function parseArgs(argv?: string[]) {
@@ -71,7 +73,7 @@ function parseArgs(argv?: string[]) {
 
 export const exec: CliExecFn = async (argv, progress) => {
   const args = parseArgs(argv);
-  if (args === null) return;
+  if (args === null) return { error: invalidOptionText + '\n' + helpText };
 
   if (args['--help']) {
     return { text: helpText };

@@ -3,24 +3,24 @@ import { invalidOptionText } from '../../lib/messages';
 import { CliExecFn } from '../../types';
 import * as Log from '../../lib/log';
 import { getAllConversations } from '../../api/slack/conversations';
-import { postMessageToSlack } from '../../api/slack/chat';
 import { parseOptions } from '../../lib/parser';
 import { summarizeUser } from '../../api/gpt/summarize/user';
 import { retrieveInfoForArgs } from '../../lib/arguments';
 import { validate } from '../../api/gpt';
 
 const helpText = `
+\`\`\`
 Command:
-  slack-cli summarize:member  指定されたチャンネルxユーザーの直近の投稿をGPTで要約する
-  * 環境変数に OPENAI_API_KEY, OPENAI_API_BASE の設定が必要。
-  * このコマンドは、チャンネルの投稿を全て取得してから要約を行うため、取得する投稿数が多い場合は時間がかかる。
+  summarize:member  指定されたチャンネルxユーザーの直近の投稿をGPTで要約する
+    * 環境変数に OPENAI_API_KEY, OPENAI_API_BASE の設定が必要。
+    * このコマンドは、チャンネルの投稿を全て取得してから要約を行うため、取得する投稿数が多い場合は時間がかかる。
 
 Usage:
-  slack-cli summarize:member --channel-name aaa --member-id bbb [options]
+  slack-cli summarize:member --channel-name aaa --member-fuzzy-name 佐藤 [options]
 
 Options:
-  --channel-id        集計対象チャンネルID。--channel-id or --channel-name が必須。
-  --channel-name      集計対象チャンネル名。--channel-id or --channel-name が必須。
+  --channel-id        集計対象チャンネルID。slash-command 以外では --channel-id or --channel-name が必須。
+  --channel-name      集計対象チャンネル名。slash-command 以外では --channel-id or --channel-name が必須。
   --member-id         メンバーのID。member-id or member-fuzzy-name が必須。
   --member-fuzzy-name メンバーのアカウント名。完全一致である必要はないが、複数当てはまる場合は最初にヒットしたユーザーにマッピングされるので注意。
   --limit             取得する投稿数（チャンネルの最新投稿を limit 件ずつ取得して対象ユーザーの投稿が limit 件になるまで取得する。スレッドの投稿を取得する都合上大幅に超えてしまうこともある）
@@ -28,6 +28,7 @@ Options:
 
   --help, -h          このヘルプを表示
   --dry-run           投稿はせずに投稿内容をログ出力する
+\`\`\`
 `;
 
 function parseArgs(argv?: string[]) {
@@ -64,7 +65,7 @@ function parseArgs(argv?: string[]) {
 
 export const exec: CliExecFn = async (argv, progress) => {
   const args = parseArgs(argv);
-  if (args === null) return;
+  if (args === null) return { error: invalidOptionText + '\n' + helpText };
 
   if (args['--help']) {
     return { text: helpText };
@@ -122,27 +123,25 @@ export const exec: CliExecFn = async (argv, progress) => {
     ) || [];
 
   try {
-    const response = await summarizeUser(targetText);
+    const response = await summarizeUser(targetText, progress);
 
-    const text = `#${channel?.name} 内の直近 ${
-      targetMessages.length
-    }件の投稿（内スレッド ${
+    const text = `直近 ${targetMessages.length}件の投稿（内スレッド ${
       targetMessages.filter((m) => m.thread_ts && !m.reply_count).length
     }件）から、${
       user?.real_name ?? user?.name
-    } について考察しました。\n${response
+    } について考察しました。\n\`\`\`\n${response
       .split('\n')
       .filter((s) => s !== '')
       .map((s) => '・' + s.replace(/(\t| )+/, ''))
-      .join('\n')}`;
+      .join('\n')}\n\`\`\``;
     if (args['--dry-run']) {
       Log.success(text);
       return;
     }
     return {
       asUser: !options.asBot,
-      postArg: { channel: channel.id!, text },
-      text,
+      postArg: { channel: channel.id!, text: `<#${channel.id}> 内の${text}` },
+      text: `#${channel.name} 内の${text}`,
     };
   } catch (e) {
     Log.error(e);

@@ -1,4 +1,5 @@
 export const commandListText = `
+\`\`\`
 Command:
   slack-cli aggregate:members-reacted 指定された期間内に指定されたリアクションを最も行ったユーザー最大5名をリストアップする
   slack-cli aggregate:reactions       指定された期間内に指定されたリアクション数が多いユーザーを最大5名リストアップする
@@ -13,6 +14,7 @@ Command:
   slack-cli --help, -h                ヘルプを表示する
   👇  詳細
   TODO: URL か何か
+\`\`\`
 `;
 
 export const invalidOptionText = `⚠️ 不正なオプションが含まれています`;
