@@ -3,6 +3,8 @@ import { Message } from '@slack/web-api/dist/response/ChannelsHistoryResponse';
 import dayjs from 'dayjs';
 import { retrieveAllUser } from '../api/user';
 import { SlackDemoOptions } from '../types';
+import { getAllUsers } from '../api/slack/users';
+import { getAllUsergroups } from '../api/slack/usergroups';
 
 export function getCurrentCliVersion() {
   return '0.1.0';
@@ -51,15 +53,22 @@ export const replaceMemberIdToNameInTexts = async (
   texts: string[],
   options?: SlackDemoOptions
 ) => {
-  const members = (await retrieveAllUser(options))
-    .filter((m) => m.id)
-    .map((m) => ({ regexp: new RegExp(m.id!, 'g'), name: m.name }));
+  // 全員の名前が欲しいので全員分のユーザー情報を取得する
+  const members = (await getAllUsers({}, options))
+    .filter((m) => m.id && m.name)
+    .map((m) => ({ regexp: new RegExp(m.id!, 'g'), name: m.name! }));
+
+  const usergroups = (await getAllUsergroups({}, options))
+    .filter((u) => u.id && u.name)
+    .map((u) => ({ regexp: new RegExp(u.id!, 'g'), name: u.name! }));
 
   return texts.map((t) => {
     let text = t;
     for (const member of members) {
-      if (!member.name) continue;
       text = text.replace(member.regexp, member.name);
+    }
+    for (const usergroup of usergroups) {
+      text = text.replace(usergroup.regexp, usergroup.name);
     }
     return text;
   });

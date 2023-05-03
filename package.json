@@ -27,7 +27,7 @@
   },
   "devDependencies": {
     "@slack/bolt": "3.13.0",
-    "@slack/web-api": "6.7.2",
+    "@slack/web-api": "6.8.1",
     "@types/configstore": "6.0.0",
     "@types/google-spreadsheet": "3.3.0",
     "@typescript-eslint/eslint-plugin": "5.41.0",

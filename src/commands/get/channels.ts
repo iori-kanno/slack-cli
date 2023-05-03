@@ -6,6 +6,7 @@ import { getAllChannels } from '../../api/slack/channel';
 import { parseOptions } from '../../lib/parser';
 import orderBy from 'just-order-by';
 import { Channel } from '@slack/web-api/dist/response/ChannelsListResponse';
+import { convertToSimpleDate } from '../../lib/date';
 
 const helpText = `
 \`\`\`
@@ -84,10 +85,14 @@ export const exec: CliExecFn = async (argv) => {
       (o) => o
     ).length > 1
   ) {
-    Log.error('ソートオプションが複数指定されています。1つにしてください。');
+    const error = 'ソートオプションが複数指定されています。1つにしてください。';
+    Log.error(error);
+    return { error };
   }
   if ([args['--asc'], args['--desc']].filter((v) => v).length > 1) {
-    Log.error('--asc と --desc はどちらか1つだけ指定してください。');
+    const error = '--asc と --desc はどちらか1つだけ指定してください。';
+    Log.error(error);
+    return { error };
   }
 
   const prefix = args['--filter-prefix'];
@@ -185,7 +190,7 @@ export const exec: CliExecFn = async (argv) => {
     return;
   }
 
-  return { text: '```' + response + '```' };
+  return { text: '```\n' + response + '\n```' };
 };
 
 const additionalInfo = (c: Channel, numOfDigits: number) => {
@@ -194,15 +199,4 @@ const additionalInfo = (c: Channel, numOfDigits: number) => {
   return `(${num}人, ${convertToSimpleDate(c.created)}${
     c.is_archived ? ', archived' : ''
   })`;
-};
-
-const convertToSimpleDate = (created: number | undefined) => {
-  if (!created) return '';
-  const date = new Date(created * 1000);
-  return (
-    `${date.getFullYear()}/` +
-    `${date.getMonth() + 1}`.padStart(2, '0') +
-    '/' +
-    `${date.getDate()}`.padStart(2, '0')
-  );
 };
