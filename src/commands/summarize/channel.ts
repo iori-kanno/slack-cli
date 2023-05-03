@@ -93,7 +93,7 @@ export const exec: CliExecFn = async (argv, progress) => {
     message: `${targetMessages.length}件の投稿を取得しました。要約を開始します...`,
   });
 
-  const targetText = await replaceMemberIdToNameInTexts(
+  const targetTexts = await replaceMemberIdToNameInTexts(
     targetMessages.map((m) =>
       ((m.user ?? '') + ': ' + m.text || '')
         .replace(/\n/g, ' ')
@@ -101,10 +101,10 @@ export const exec: CliExecFn = async (argv, progress) => {
     ) || []
   );
 
-  Log.debug(targetText.map((t) => t.substring(0, 30)));
+  Log.debug(targetTexts.map((t) => t.substring(0, 30)));
 
   try {
-    const response = await summarizeChannel(targetText);
+    const response = await summarizeChannel(targetTexts, progress);
 
     const text = `直近 ${targetMessages.length}件の投稿（内スレッド ${
       targetMessages.filter((m) => m.thread_ts && !m.reply_count).length

@@ -123,7 +123,7 @@ export const exec: CliExecFn = async (argv, progress) => {
     ) || [];
 
   try {
-    const response = await summarizeUser(targetText);
+    const response = await summarizeUser(targetText, progress);
 
     const text = `直近 ${targetMessages.length}件の投稿（内スレッド ${
       targetMessages.filter((m) => m.thread_ts && !m.reply_count).length
