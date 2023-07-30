@@ -5,6 +5,8 @@ import {
   ConversationsHistoryResponse,
   ConversationsListArguments,
   ConversationsListResponse,
+  ConversationsOpenArguments,
+  ConversationsOpenResponse,
   ConversationsRepliesArguments,
   ConversationsRepliesResponse,
 } from '@slack/web-api';
@@ -114,4 +116,12 @@ export const getAllReplies = async (
   } while (cursor);
 
   return messages;
+};
+
+export const openConversation = async (
+  args: ConversationsOpenArguments,
+  options?: SlackDemoOptions
+): Promise<ConversationsOpenResponse> => {
+  if (options?.asBot) return botClient.conversations.open(args);
+  else return userClient.conversations.open(args);
 };

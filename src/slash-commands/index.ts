@@ -4,6 +4,8 @@ import * as Log from '../lib/log';
 import { app } from './app';
 import { handleRespond } from './util';
 import { handleMonitoring } from './monitoring';
+import { blockTemplates, valueMap } from '../commands/pulse/utils/constants';
+import { updateSheet } from '../commands/pulse/utils/spread-sheet';
 
 /* Add functionality here */
 
@@ -12,7 +14,6 @@ import { handleMonitoring } from './monitoring';
     {
       '--permitted-users': String,
       '--monitoring-channel-id': String,
-      '--port': Number,
       '--debug': Boolean,
     },
     {
@@ -20,7 +21,6 @@ import { handleMonitoring } from './monitoring';
     }
   );
 
-  const port = args['--port'] || 3000;
   const isDebug = !!args['--debug'];
   Log.setDebug(isDebug);
   const monitoring = handleMonitoring(app, args['--monitoring-channel-id']);
@@ -28,11 +28,19 @@ import { handleMonitoring } from './monitoring';
   Log.debug(`permittedUsers: ${permittedUsers ? permittedUsers : 'all users'}`);
 
   // Start the app
-  await app.start(port);
+  await app.start();
 
-  Log.success(
-    `⚡️ Bolt app is running on ${port}${isDebug ? ' with DEBUG MODE!' : '!'}`
-  );
+  Log.success(`⚡️ Bolt app is running ${isDebug ? ' with DEBUG MODE!' : '!'}`);
+
+  Object.entries(valueMap).forEach(([key, value]) => {
+    app.action('hearing_button_' + value, async ({ ack, body, respond }) => {
+      await ack();
+      console.log('hearing_button', body);
+      await respond(`you clicked :${key}: button`);
+      // スプシに value を書き込む
+      await updateSheet({ value, userId: body.user.id, header: '6月' });
+    });
+  });
 
   app.command('/slack-cli', async ({ command, ack, respond }) => {
     try {

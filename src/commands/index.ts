@@ -15,6 +15,7 @@ import * as joinAllPublicChannels from './join-all-public-channels';
 import { summarizeChannel, summarizeMember } from './summarize';
 import * as Log from '../lib/log';
 import { commandListText } from '../lib/messages';
+import { pulseHearing } from './pulse';
 
 export async function exec(
   execCommandName: string,
@@ -33,6 +34,7 @@ export async function exec(
     'get:usergroups': async (a) => getUsergroups.exec(a),
     'join:public-channels': async (a) => joinAllPublicChannels.exec(a),
     'listup:reactions': async (a) => listUpReactions.exec(a),
+    'pulse:hearing': async (a) => pulseHearing.exec(a),
     'summarize:channel': async (a, b) => summarizeChannel.exec(a, b),
     'summarize:member': async (a, b) => summarizeMember.exec(a, b),
     '--help': async (a) => help.exec(a),
