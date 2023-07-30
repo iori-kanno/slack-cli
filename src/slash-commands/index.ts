@@ -2,10 +2,11 @@ import { exec } from '../commands';
 import arg from 'arg';
 import * as Log from '../lib/log';
 import { app } from './app';
-import { handleRespond } from './util';
+import { handleRespond, loggingPulseCheck } from './util';
 import { handleMonitoring } from './monitoring';
 import { blockTemplates, valueMap } from '../commands/pulse/utils/constants';
 import { updateSheet } from '../commands/pulse/utils/spread-sheet';
+import { appendFile, appendFileAsCsv } from '../lib/appendFile';
 
 /* Add functionality here */
 
@@ -37,8 +38,9 @@ import { updateSheet } from '../commands/pulse/utils/spread-sheet';
       await ack();
       console.log('hearing_button', body);
       await respond(`you clicked :${key}: button`);
+      await loggingPulseCheck(body, value);
       // スプシに value を書き込む
-      await updateSheet({ value, userId: body.user.id, header: '6月' });
+      // await updateSheet({ value, userId: body.user.id, header: '7月' });
     });
   });
 

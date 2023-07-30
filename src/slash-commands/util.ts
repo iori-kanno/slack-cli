@@ -1,7 +1,8 @@
 import { ChatPostMessageArguments } from '@slack/web-api';
 import { app } from './app';
-import { RespondFn } from '@slack/bolt';
+import { RespondFn, SlackAction } from '@slack/bolt';
 import * as Log from '../lib/log';
+import { appendFileAsCsv } from '../lib/appendFile';
 
 const customRespond = async (
   arg: ChatPostMessageArguments,
@@ -43,4 +44,23 @@ export const handleRespond = (
         });
     }
   };
+};
+
+export const loggingPulseCheck = async (action: SlackAction, value: number) => {
+  let name = '';
+  if ('name' in action.user) {
+    name = action.user.name;
+  } else if ('username' in action.user) {
+    name = action.user.username;
+  }
+  return await appendFileAsCsv('../logs/pulse-check.log', [
+    action.user.id,
+    name,
+    `${value}`,
+    new Date().toISOString(),
+  ]);
+};
+
+export const trimChannelArg = (text: string) => {
+  return text.replace(/<#.*\|(.*)>/, '$1');
 };

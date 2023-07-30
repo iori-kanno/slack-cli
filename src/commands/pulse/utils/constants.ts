@@ -13,7 +13,7 @@ export const blockTemplates = [
     type: 'section',
     text: {
       type: 'mrkdwn',
-      text: '*最近の調子はどうですか？*',
+      text: '*回答時の調子を教えてください*',
     },
   },
   {

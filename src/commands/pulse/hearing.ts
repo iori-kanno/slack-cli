@@ -72,7 +72,29 @@ export const exec: CliExecFn = async (argv) => {
   } else {
     const userIds = (await loadUserIds(options)) || [];
     Log.debug('userIds', userIds);
-    users = await mapUserIdsToMembers(userIds, options);
+    // リストにあっても削除済み、制限されている、ワークフローボットの場合は除外する
+    users = (await mapUserIdsToMembers(userIds, options)).filter(
+      (u) =>
+        !u.deleted &&
+        !u.is_restricted &&
+        !u.is_ultra_restricted &&
+        !u.is_workflow_bot
+    );
+    const restrictedUsers = (
+      await mapUserIdsToMembers(userIds, options)
+    ).filter(
+      (u) =>
+        u.deleted ||
+        u.is_restricted ||
+        u.is_ultra_restricted ||
+        u.is_workflow_bot
+    );
+    if (restrictedUsers.length > 0) {
+      Log.warn(
+        `以下のユーザーは削除済み、制限されている、ワークフローボットなので除外しました。`
+      );
+      Log.warn(JSON.stringify(restrictedUsers, null, 2));
+    }
   }
 
   console.log(JSON.stringify(users, null, 2));
