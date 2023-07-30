@@ -1,6 +1,6 @@
 import { ChatPostMessageArguments } from '@slack/web-api';
-import { app } from './app';
-import { RespondFn } from '@slack/bolt';
+import { getApp } from './app';
+import { RespondFn, SlackAction } from '@slack/bolt';
 import * as Log from '../lib/log';
 
 const customRespond = async (
@@ -8,12 +8,12 @@ const customRespond = async (
   tsToUdate?: string
 ) => {
   if (tsToUdate) {
-    return app.client.chat.update({
+    return getApp().client.chat.update({
       ...arg,
       ts: tsToUdate,
     });
   } else {
-    return app.client.chat.postMessage(arg);
+    return getApp().client.chat.postMessage(arg);
   }
 };
 

@@ -5,6 +5,8 @@ import {
   ConversationsHistoryResponse,
   ConversationsListArguments,
   ConversationsListResponse,
+  ConversationsOpenArguments,
+  ConversationsOpenResponse,
   ConversationsRepliesArguments,
   ConversationsRepliesResponse,
 } from '@slack/web-api';
