@@ -1,5 +1,5 @@
 import { ChatPostMessageArguments } from '@slack/web-api';
-import { app } from './app';
+import { getApp } from './app';
 import { RespondFn, SlackAction } from '@slack/bolt';
 import * as Log from '../lib/log';
 import { appendFileAsCsv } from '../lib/appendFile';
@@ -9,12 +9,12 @@ const customRespond = async (
   tsToUdate?: string
 ) => {
   if (tsToUdate) {
-    return app.client.chat.update({
+    return getApp().client.chat.update({
       ...arg,
       ts: tsToUdate,
     });
   } else {
-    return app.client.chat.postMessage(arg);
+    return getApp().client.chat.postMessage(arg);
   }
 };
 
@@ -46,14 +46,18 @@ export const handleRespond = (
   };
 };
 
-export const loggingPulseCheck = async (action: SlackAction, value: number) => {
+export const loggingPulseCheck = async (
+  action: SlackAction,
+  value: number,
+  filepath: string = '../logs/pulse-check.log'
+) => {
   let name = '';
   if ('name' in action.user) {
     name = action.user.name;
   } else if ('username' in action.user) {
     name = action.user.username;
   }
-  return await appendFileAsCsv('../logs/pulse-check.log', [
+  return await appendFileAsCsv(filepath, [
     action.user.id,
     name,
     `${value}`,

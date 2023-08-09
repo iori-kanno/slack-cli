@@ -1,12 +1,10 @@
 import { exec } from '../commands';
 import arg from 'arg';
 import * as Log from '../lib/log';
-import { app } from './app';
+import { buildApp } from './app';
 import { handleRespond, loggingPulseCheck } from './util';
 import { handleMonitoring } from './monitoring';
-import { blockTemplates, valueMap } from '../commands/pulse/utils/constants';
-import { updateSheet } from '../commands/pulse/utils/spread-sheet';
-import { appendFile, appendFileAsCsv } from '../lib/appendFile';
+import { valueMap } from '../commands/pulse/utils/constants';
 
 /* Add functionality here */
 
@@ -15,6 +13,8 @@ import { appendFile, appendFileAsCsv } from '../lib/appendFile';
     {
       '--permitted-users': String,
       '--monitoring-channel-id': String,
+      '--socket-mode-disable': Boolean,
+      '--port': Number,
       '--debug': Boolean,
     },
     {
@@ -24,20 +24,28 @@ import { appendFile, appendFileAsCsv } from '../lib/appendFile';
 
   const isDebug = !!args['--debug'];
   Log.setDebug(isDebug);
+
+  // Initialize your app
+  const isSocketMode = !(args['--socket-mode-disable'] === true);
+  const app = buildApp({ socketMode: isSocketMode });
   const monitoring = handleMonitoring(app, args['--monitoring-channel-id']);
   const permittedUsers = args['--permitted-users']?.split(',');
   Log.debug(`permittedUsers: ${permittedUsers ? permittedUsers : 'all users'}`);
 
   // Start the app
-  await app.start();
-
-  Log.success(`⚡️ Bolt app is running ${isDebug ? ' with DEBUG MODE!' : '!'}`);
+  if (isSocketMode) {
+    await app.start();
+    Log.success(`⚡️ Bolt app is running!`);
+  } else {
+    const port = args['--port'] || 3000;
+    await app.start(port);
+    Log.success(`⚡️ Bolt app is running on ${port} port!`);
+  }
 
   Object.entries(valueMap).forEach(([key, value]) => {
     app.action('hearing_button_' + value, async ({ ack, body, respond }) => {
       await ack();
-      console.log('hearing_button', body);
-      await respond(`you clicked :${key}: button`);
+      await respond(`あなたの回答 :${key}: (${new Date().toLocaleString()})`);
       await loggingPulseCheck(body, value);
       // スプシに value を書き込む
       // await updateSheet({ value, userId: body.user.id, header: '7月' });

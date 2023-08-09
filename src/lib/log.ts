@@ -11,6 +11,7 @@ export function setLogger(newLogger: Logger) {
 export function setDebug(enabled?: boolean) {
   isDebug = enabled ?? false;
   logger?.setLevel(enabled ? LogLevel.DEBUG : LogLevel.INFO);
+  success(`Debug mode is ${enabled ? 'enabled' : 'disabled'}.`);
 }
 
 export function error(message: any, ...optionalParams: any[]) {

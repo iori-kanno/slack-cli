@@ -185,7 +185,7 @@ export const exec: CliExecFn = async (argv, progress) => {
       blocks.push(`:${rid}: をリアクションした人はいませんでした。`);
       continue;
     }
-    console.log(rid, candidates);
+
     // 獲得数が一番多い順に 5位まで、もしくは同列順位を含めて 5人以上になるようにリストアップする
     const list: { rid: string; mid: string; count: number; rank: number }[] =
       [];

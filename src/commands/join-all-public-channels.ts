@@ -85,7 +85,7 @@ export const exec: CliExecFn = async (argv) => {
           !ch.is_shared
       )
       .map((ch) => {
-        Log.debug(`Joining to #${ch.name} (${ch.id})...`);
+        Log.success(`Joining to #${ch.name} (${ch.id})...`);
         return ch;
       })
       .map(async (ch) => {

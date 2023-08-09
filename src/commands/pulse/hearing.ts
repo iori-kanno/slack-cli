@@ -61,8 +61,6 @@ export const exec: CliExecFn = async (argv) => {
     return { text: helpText };
   }
   const options = parseOptions(args);
-  console.log('options', options);
-  console.log('args', args);
 
   // スプレッドシート or --user-ids で指定したユーザーの ID を取得する
   let users: Member[] = [];
@@ -72,17 +70,16 @@ export const exec: CliExecFn = async (argv) => {
   } else {
     const userIds = (await loadUserIds(options)) || [];
     Log.debug('userIds', userIds);
+    const allUsers = await mapUserIdsToMembers(userIds, options);
     // リストにあっても削除済み、制限されている、ワークフローボットの場合は除外する
-    users = (await mapUserIdsToMembers(userIds, options)).filter(
+    users = allUsers.filter(
       (u) =>
         !u.deleted &&
         !u.is_restricted &&
         !u.is_ultra_restricted &&
         !u.is_workflow_bot
     );
-    const restrictedUsers = (
-      await mapUserIdsToMembers(userIds, options)
-    ).filter(
+    const restrictedUsers = allUsers.filter(
       (u) =>
         u.deleted ||
         u.is_restricted ||
@@ -97,7 +94,6 @@ export const exec: CliExecFn = async (argv) => {
     }
   }
 
-  console.log(JSON.stringify(users, null, 2));
   // DM で質問する
   let all: string[] = [];
   for (const u of users) {
@@ -114,7 +110,6 @@ export const exec: CliExecFn = async (argv) => {
           options
         );
       }
-      console.log(JSON.stringify(res, null, 2));
       all.push(`I asked ${u.real_name || u.name}.`);
     }
   }
