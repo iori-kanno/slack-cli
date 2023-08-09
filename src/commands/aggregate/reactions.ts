@@ -80,7 +80,7 @@ export const exec: CliExecFn = async (argv, progress) => {
   }
   const options = parseOptions(args);
   const { targetReactions, singleReactions, categorizedReactions } =
-    parseReactions(args['--reactions']);
+    await parseReactions(args['--reactions']);
 
   // dry-run でないなら投稿先チャンネルは必須
   let channel: Channel | undefined;

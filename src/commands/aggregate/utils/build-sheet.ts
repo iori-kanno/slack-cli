@@ -4,6 +4,7 @@ import { getAllUsers } from '../../../api/slack/users';
 import { buildSheet } from '../../../api/spreadsheet/build-sheet';
 import * as Log from '../../../lib/log';
 import { SlackDemoOptions } from '../../../types';
+import { mapSystemEmoji } from '../../../lib/emoji';
 
 const dateTimeString = () => {
   // NOTE: スプレッドシートにコロン `:` が使えないので時分秒を使う
@@ -71,17 +72,6 @@ const updateProperties = async (
     frozenColumnCount: 1,
     frozenRowCount: 2,
   });
-};
-
-const mapSystemEmoji = (reactions: string[]): string[] => {
-  try {
-    // システム組み込みの絵文字は slack api からは取れないので自前で用意している
-    const emoji = require('../../../lib/assets/emoji.json');
-    return reactions.map((r) => emoji[r] || r);
-  } catch (e) {
-    Log.error(`emoji.json Error: ${e}`);
-    throw new Error("emoji.json doesn't exist");
-  }
 };
 
 const mapUsers = async (

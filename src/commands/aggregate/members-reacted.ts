@@ -98,7 +98,7 @@ export const exec: CliExecFn = async (argv, progress) => {
   const targetItems =
     (await aggregateUniqItemsReactedByMembers(options, progress)) || [];
   const { targetReactions, singleReactions, categorizedReactions } =
-    parseReactions(args['--reactions']);
+    await parseReactions(args['--reactions']);
 
   const users = await retrieveAllUser(options);
 
