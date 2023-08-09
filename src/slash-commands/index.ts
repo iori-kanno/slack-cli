@@ -1,7 +1,7 @@
 import { exec } from '../commands';
 import arg from 'arg';
 import * as Log from '../lib/log';
-import { app } from './app';
+import { buildApp } from './app';
 import { handleRespond } from './util';
 import { handleMonitoring } from './monitoring';
 
@@ -12,6 +12,7 @@ import { handleMonitoring } from './monitoring';
     {
       '--permitted-users': String,
       '--monitoring-channel-id': String,
+      '--socket-mode-disable': Boolean,
       '--port': Number,
       '--debug': Boolean,
     },
@@ -20,19 +21,25 @@ import { handleMonitoring } from './monitoring';
     }
   );
 
-  const port = args['--port'] || 3000;
   const isDebug = !!args['--debug'];
   Log.setDebug(isDebug);
+
+  // Initialize your app
+  const isSocketMode = !(args['--socket-mode-disable'] === true);
+  const app = buildApp({ socketMode: isSocketMode });
   const monitoring = handleMonitoring(app, args['--monitoring-channel-id']);
   const permittedUsers = args['--permitted-users']?.split(',');
   Log.debug(`permittedUsers: ${permittedUsers ? permittedUsers : 'all users'}`);
 
   // Start the app
-  await app.start(port);
-
-  Log.success(
-    `⚡️ Bolt app is running on ${port}${isDebug ? ' with DEBUG MODE!' : '!'}`
-  );
+  if (isSocketMode) {
+    await app.start();
+    Log.success(`⚡️ Bolt app is running!`);
+  } else {
+    const port = args['--port'] || 3000;
+    await app.start(port);
+    Log.success(`⚡️ Bolt app is running on ${port} port!`);
+  }
 
   app.command('/slack-cli', async ({ command, ack, respond }) => {
     try {

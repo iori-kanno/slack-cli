@@ -21,7 +21,7 @@ const setSlackEmojiToHeaders = async (
   //       最初にヘッダーを reaction name のまま追加して、ここで最後に置き換える
   const emoji = await getAllEmoji({});
   const headers = reactions.map((r) => {
-    if (r === '01' || r === '1') console.log(r, emoji[r]);
+    if (r === '01' || r === '1') Log.debug(r, emoji[r]);
     // slack emoji は png/gif 等画像の URL なので image 関数にする
     return emoji[r] ? `=image("${emoji[r]}")` : r;
   });
