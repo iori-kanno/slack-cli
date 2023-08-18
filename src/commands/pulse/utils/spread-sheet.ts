@@ -10,10 +10,12 @@ export const loadUserIds = async (options?: SlackDemoOptions) => {
     await client.loadInfo();
     Log.debug(`SpreadSheet: ${client.title}(id: ${client.spreadsheetId})`);
 
-    const sheet = client.sheetsByIndex[0];
+    const sheet = client.sheetsById['0'];
     await sheet.loadCells();
     const rows = await sheet.getRows();
-    const userIds = rows.map((row) => row.UserId as string);
+    const userIds = rows
+      .filter((row) => (row.Target as string) === '○')
+      .map((row) => row.UserId as string);
     return userIds;
   } catch (e) {
     Log.error(`loadUserIds Error: ${e}`);

@@ -1,5 +1,20 @@
 export const SHEET_ID = '1LkSFKOWOhjWYfY9BGqsYDlK4ey9us9mx6xY0HG3Ne3Q';
 
+const ABOUT_PULSE_CHECK_URL = process.env.ABOUT_PULSE_CHECK_URL;
+const contextBlocks = ABOUT_PULSE_CHECK_URL
+  ? [
+      {
+        type: 'context',
+        elements: [
+          {
+            type: 'mrkdwn',
+            text: `:notion-official: <${ABOUT_PULSE_CHECK_URL}|パルスチェックシステムについて>`,
+          },
+        ],
+      },
+    ]
+  : [];
+
 export const valueMap = {
   zekkoucho: 5,
   koucho: 4,
@@ -71,13 +86,5 @@ export const blockTemplates = [
       },
     ],
   },
-  {
-    type: 'context',
-    elements: [
-      {
-        type: 'mrkdwn',
-        text: ':notion-official: <https://www.notion.so/ivry-jp/232df270438d481faa60168dd662c3ef|パルスチェックシステムについて>',
-      },
-    ],
-  },
+  ...contextBlocks,
 ];

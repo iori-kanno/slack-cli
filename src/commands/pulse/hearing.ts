@@ -8,7 +8,7 @@ import { openConversation } from '../../api/slack/conversations';
 import { mapUserIdsToMembers } from '../../api/user';
 import { postMessageToSlack } from '../../api/slack/chat';
 import { blockTemplates } from './utils/constants';
-import { loadUserIds, updateSheet } from './utils/spread-sheet';
+import { loadUserIds } from './utils/spread-sheet';
 
 const helpText = `
 \`\`\`
@@ -79,18 +79,18 @@ export const exec: CliExecFn = async (argv) => {
         !u.is_ultra_restricted &&
         !u.is_workflow_bot
     );
-    const restrictedUsers = allUsers.filter(
-      (u) =>
-        u.deleted ||
-        u.is_restricted ||
-        u.is_ultra_restricted ||
-        u.is_workflow_bot
-    );
+    const restrictedUsers = allUsers.filter((u) => !users.includes(u));
     if (restrictedUsers.length > 0) {
       Log.warn(
         `以下のユーザーは削除済み、制限されている、ワークフローボットなので除外しました。`
       );
-      Log.warn(JSON.stringify(restrictedUsers, null, 2));
+      Log.warn(
+        JSON.stringify(
+          restrictedUsers.map((u) => delete u.profile && u),
+          null,
+          2
+        )
+      );
     }
   }
 
@@ -114,5 +114,7 @@ export const exec: CliExecFn = async (argv) => {
     }
   }
 
-  return { text: '```\n' + all.join('\n') + '```' };
+  return {
+    text: '```\n' + all.join('\n') + `\nTotal ${all.length} users.\n` + '```',
+  };
 };
