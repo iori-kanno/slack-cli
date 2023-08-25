@@ -6,8 +6,16 @@ import { getAllConversations } from '../../api/slack/conversations';
 import { parseOptions } from '../../lib/parser';
 import { retrieveInfoForArgs } from '../../lib/arguments';
 import { summarizeChannel } from '../../api/gpt/summarize/channel';
-import { replaceMemberIdToNameInTexts } from '../../lib/helper';
+import {
+  convertTsToDate,
+  replaceMemberIdToNameInTexts,
+} from '../../lib/helper';
 import { validate } from '../../api/gpt';
+import {
+  convertDateToTs,
+  convertToSimpleDate,
+  convertTsToSimpleDate,
+} from '../../lib/date';
 
 const helpText = `
 \`\`\`
@@ -22,6 +30,8 @@ Usage:
 Options:
   --channel-id      集計対象チャンネルID。slash-command 以外では --channel-id or --channel-name が必須。
   --channel-name    集計対象チャンネル名。slash-command 以外では --channel-id or --channel-name が必須。
+  --start-date      集計対象の期間の開始日時。指定例: '2022-12-01' 指定がない場合は最新から limit 分取得する。
+  --end-date        集計対象の期間の終了日時。指定例: '2022-12-01' 指定がない場合は最新から limit 分取得する。
   --limit           取得する投稿数。デフォルトは 500件（スレッドの投稿を取得する都合上大幅に超えてしまうこともある）
   --as-user         BOT のトークンを利用せず、ユーザートークンを利用してリクエストを行う。デフォルト false
 
@@ -37,6 +47,8 @@ function parseArgs(argv?: string[]) {
         // Types
         '--channel-id': String,
         '--channel-name': String,
+        '--start-date': String,
+        '--end-date': String,
         '--limit': Number,
         '--dry-run': Boolean,
         '--as-user': Boolean,
@@ -78,15 +90,31 @@ export const exec: CliExecFn = async (argv, progress) => {
     return { error: 'channel not found' };
   }
   const limit = Math.min(args['--limit'] || 500, 1000);
+  const oldest =
+    args['--start-date'] && options.startDate
+      ? convertDateToTs(options.startDate)
+      : undefined;
+  const latest =
+    args['--end-date'] && options.endDate
+      ? convertDateToTs(options.endDate)
+      : undefined;
   progress?.({ percent: 0, message: `${limit}件の投稿を取得開始します...` });
 
   // 投稿一覧
   const targetMessages = await getAllConversations(
-    { channel: channel.id, limit },
+    { channel: channel.id, limit, oldest, latest },
     limit,
     undefined,
     options
   );
+  if (targetMessages.length === 0) {
+    const text = '該当する投稿がありませんでした。';
+    return {
+      asUser: !options.asBot,
+      postArg: { channel: channel.id!, text },
+      text,
+    };
+  }
 
   progress?.({
     percent: 30,
@@ -106,7 +134,10 @@ export const exec: CliExecFn = async (argv, progress) => {
   try {
     const response = await summarizeChannel(targetTexts, progress);
 
-    const text = `直近 ${targetMessages.length}件の投稿（内スレッド ${
+    const term = `${convertTsToSimpleDate(
+      targetMessages[0].ts!
+    )} ~ ${convertTsToSimpleDate(targetMessages.reverse()[0].ts!)}`;
+    const text = `${term} ${targetMessages.length}件の投稿（内スレッド ${
       targetMessages.filter((m) => m.thread_ts && !m.reply_count).length
     }件）から、チャンネルのトピックについて要約しました。\n\`\`\`\n${response
       .split('\n')
