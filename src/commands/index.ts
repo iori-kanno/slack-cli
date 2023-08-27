@@ -7,7 +7,8 @@ import {
   getLatestPosts,
   getMembers,
   getChannels,
-  getUsergroups,
+  getUsergroupMembers,
+  getUsergroupList,
 } from './get';
 import { deleteMessage } from './delete';
 import { aggregateReactions, aggregateMembersReacted } from './aggregate';
@@ -30,7 +31,8 @@ export async function exec(
     'get:members': async (a) => getMembers.exec(a),
     'get:posts': async (a) => getLatestPosts.exec(a),
     'get:reactions': async (a) => getReactionsForUser.exec(a),
-    'get:usergroups': async (a) => getUsergroups.exec(a),
+    'get:usergroups': async (a) => getUsergroupList.exec(a),
+    'get:usergroups:members': async (a) => getUsergroupMembers.exec(a),
     'join:public-channels': async (a) => joinAllPublicChannels.exec(a),
     'listup:reactions': async (a) => listUpReactions.exec(a),
     'summarize:channel': async (a, b) => summarizeChannel.exec(a, b),

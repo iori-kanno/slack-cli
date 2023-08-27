@@ -1,10 +1,10 @@
 import arg from 'arg';
-import { invalidOptionText } from '../../lib/messages';
-import { CliExecFn } from '../../types';
-import * as Log from '../../lib/log';
-import { parseOptions } from '../../lib/parser';
-import { getAllUsergroups } from '../../api/slack/usergroups';
-import { convertToSimpleDate } from '../../lib/date';
+import { invalidOptionText } from '../../../lib/messages';
+import { CliExecFn } from '../../../types';
+import * as Log from '../../../lib/log';
+import { parseOptions } from '../../../lib/parser';
+import { getAllUsergroups } from '../../../api/slack/usergroups';
+import { convertToSimpleDate } from '../../../lib/date';
 import orderBy from 'just-order-by';
 
 const helpText = `
