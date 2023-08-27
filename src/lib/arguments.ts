@@ -3,6 +3,8 @@ import { Member } from '@slack/web-api/dist/response/UsersListResponse';
 import { getAllChannels } from '../api/slack/channel';
 import { retrieveAllUser } from '../api/user';
 import { SlackDemoOptions } from '../types';
+import { getAllUsergroups } from '../api/slack/usergroups';
+import { Usergroup } from '@slack/web-api/dist/response/UsergroupsListResponse';
 
 const channel = async (
   id?: string,
@@ -12,14 +14,6 @@ const channel = async (
   getAllChannels({ exclude_archived: false }, options).then((channels) =>
     channels.find((c) => c.id === id || c.name === name)
   );
-
-type InfoProps = {
-  channelId?: string;
-  channelName?: string;
-  memberId?: string;
-  memberFuzzyName?: string;
-  options?: SlackDemoOptions;
-};
 
 const member = async (
   id?: string,
@@ -37,13 +31,43 @@ const member = async (
     )
   );
 
+const usergroup = async (
+  id?: string,
+  fuzzyName?: string,
+  options?: SlackDemoOptions
+) =>
+  getAllUsergroups({}, options).then((usergroups) =>
+    usergroups.find(
+      (ug) =>
+        ug.id === id ||
+        (fuzzyName &&
+          ug.name?.toLocaleLowerCase().includes(fuzzyName?.toLocaleLowerCase()))
+    )
+  );
+
+type InfoProps = {
+  channelId?: string;
+  channelName?: string;
+  memberId?: string;
+  memberFuzzyName?: string;
+  usergroupId?: string;
+  usergroupFuzzyName?: string;
+  options?: SlackDemoOptions;
+};
+
 export const retrieveInfoForArgs = async ({
   channelId,
   channelName,
   memberId,
   memberFuzzyName,
+  usergroupId,
+  usergroupFuzzyName,
   options,
-}: InfoProps): Promise<{ channel?: Channel; member?: Member }> =>
+}: InfoProps): Promise<{
+  channel?: Channel;
+  member?: Member;
+  usergroup?: Usergroup;
+}> =>
   Promise.all([
     channelId || channelName
       ? channel(channelId, channelName, options)
@@ -51,7 +75,11 @@ export const retrieveInfoForArgs = async ({
     memberId || memberFuzzyName
       ? member(memberId, memberFuzzyName, options)
       : undefined,
-  ]).then(([channel, member]) => ({
+    usergroupId || usergroupFuzzyName
+      ? usergroup(usergroupId, usergroupFuzzyName, options)
+      : undefined,
+  ]).then(([channel, member, usergroup]) => ({
     channel,
     member,
+    usergroup,
   }));

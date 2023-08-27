@@ -1,6 +1,8 @@
 import {
   UsergroupsListArguments,
   UsergroupsListResponse,
+  UsergroupsUsersListArguments,
+  UsergroupsUsersListResponse,
 } from '@slack/web-api';
 import { botClient, userClient } from './index';
 import { SlackDemoOptions } from '../../types';
@@ -24,7 +26,10 @@ export const getAllUsergroups = async (
   const userGroups = Array<UsergroupWithUserCount>();
   let cursor: string | undefined;
   do {
-    const res = await getUsergroupList({ ...args, cursor }, options);
+    const res = await getUsergroupList(
+      { include_users: true, include_count: true, ...args, cursor },
+      options
+    );
     cursor = res.response_metadata?.next_cursor;
     userGroups.push(
       ...(res.usergroups?.map((ug) => ({ user_count: 0, ...ug })) || [])
@@ -32,4 +37,12 @@ export const getAllUsergroups = async (
   } while (cursor);
 
   return userGroups;
+};
+
+export const getUsergroupsMembers = async (
+  args: UsergroupsUsersListArguments,
+  options?: SlackDemoOptions
+): Promise<UsergroupsUsersListResponse> => {
+  if (options?.asBot) return botClient.usergroups.users.list(args);
+  return userClient.usergroups.users.list(args);
 };
