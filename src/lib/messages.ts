@@ -7,6 +7,7 @@ Command:
   slack-cli get:channels              チャンネル一覧を表示する
   slack-cli get:members               メンバー一覧を表示する
   slack-cli get:usergroups            ユーザーグループ一覧を表示する
+  slack-cli get:usergroups:members    指定された Usergroup に属するメンバー一覧を出力する。
   slack-cli join:public-channels      BOT を全てのパブリックチャンネルに参加させる。ユーザートークンが必須。（slash-command の場合使用不可）
   slack-cli listup:reactions          指定された投稿に付いているリアクションを集計してスレッドに投稿する
   slack-cli summarize:channel         指定されたチャンネルの直近の投稿を GPT で要約する
