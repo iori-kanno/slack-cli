@@ -16,6 +16,7 @@ import * as joinAllPublicChannels from './join-all-public-channels';
 import { summarizeChannel, summarizeMember } from './summarize';
 import * as Log from '../lib/log';
 import { commandListText } from '../lib/messages';
+import { archiveChannel, archiveInactiveChannels } from './archive';
 
 export async function exec(
   execCommandName: string,
@@ -26,6 +27,9 @@ export async function exec(
     'aggregate:members-reacted': async (a, b) =>
       aggregateMembersReacted.exec(a, b),
     'aggregate:reactions': async (a, b) => aggregateReactions.exec(a, b),
+    'archive:channel': async (a) => archiveChannel.exec(a),
+    'archive:inactive-channels': async (a, b) =>
+      archiveInactiveChannels.exec(a, b),
     'delete:message': async (a) => deleteMessage.exec(a),
     'get:channels': async (a) => getChannels.exec(a),
     'get:members': async (a) => getMembers.exec(a),
