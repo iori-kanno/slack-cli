@@ -12,6 +12,7 @@ import { parseOptions } from '../../lib/parser';
 import { parseReactions } from './utils/reactions-parser';
 import { aggregateUniqItemsReactedByMembers } from '../../lib/aggregator';
 import { buildSheetReactions } from './utils/build-sheet';
+import { checkEmojiUniqueness } from '../../lib/emoji';
 
 const helpText = `
 \`\`\`
@@ -78,6 +79,8 @@ export const exec: CliExecFn = async (argv, progress) => {
   if (args['--help']) {
     return { text: helpText };
   }
+  checkEmojiUniqueness();
+
   const options = parseOptions(args);
   const { targetReactions, singleReactions, categorizedReactions } =
     await parseReactions(args['--reactions']);
@@ -115,7 +118,7 @@ export const exec: CliExecFn = async (argv, progress) => {
     }, new Map<string, Array<{ mid: string; count: number }>>());
 
   let url: string | undefined;
-  if (process.env.GOOGLE_SPREADSHEET_ID) {
+  if (process.env.GOOGLE_SPREADSHEET_ID && !options.dryRun) {
     url = await buildSheetReactions(
       {
         sheetId: process.env.GOOGLE_SPREADSHEET_ID,

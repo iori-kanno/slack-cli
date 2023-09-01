@@ -10,6 +10,7 @@ import { aggregateUniqItemsReactedByMembers } from '../../lib/aggregator';
 import { parseOptions } from '../../lib/parser';
 import { parseReactions } from './utils/reactions-parser';
 import { buildSheetMembersReacted } from './utils/build-sheet';
+import { checkEmojiUniqueness } from '../../lib/emoji';
 
 const helpText = `
 \`\`\`
@@ -82,6 +83,8 @@ export const exec: CliExecFn = async (argv, progress) => {
   if (args['--help']) {
     return { text: helpText };
   }
+  checkEmojiUniqueness();
+
   const options = parseOptions(args);
   // dry-run でないなら投稿先チャンネルは必須
   let channel: Channel | undefined;
