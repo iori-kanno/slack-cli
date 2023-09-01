@@ -7,6 +7,7 @@ import { SlackDemoOptions } from '../types';
 import { postMessageToSlack } from './slack/chat';
 import { Member } from '@slack/web-api/dist/response/UsersListResponse';
 import { Item } from '@slack/web-api/dist/response/ReactionsListResponse';
+import { replaceEmojiKeyIfNeeded } from '../lib/emoji';
 
 const getReactionsOnPost = async (
   channel?: string,
@@ -139,8 +140,10 @@ export const aggregateReactionsForEachMember = (
         for (const reaction of item.message?.reactions ?? []) {
           // リアクション名が取れないなら集計しない
           if (!reaction.name) continue;
-          // ::skin-tone-x は除外して集計する
-          const rName = reaction.name.replace(skinToneRegex, '');
+          // ::skin-tone-x は除外して集計し、絵文字名が重複している場合は集計をまとめる
+          const rName = replaceEmojiKeyIfNeeded(
+            reaction.name.replace(skinToneRegex, '')
+          );
           mDict[rName] =
             (mDict[rName] ?? 0) +
             (reaction.users?.filter((uid) => uid !== item.message?.user)

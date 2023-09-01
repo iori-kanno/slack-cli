@@ -45,7 +45,7 @@ export const getChannelsList = async (
 export const getAllConversations = async (
   args: ConversationsHistoryArguments,
   convLimit: number,
-  memberIdsPosted?: string[],
+  shouldFetchReplies: boolean | ((m: Message) => boolean),
   options?: SlackDemoOptions
 ): Promise<Message[]> => {
   Log.debug(
@@ -55,7 +55,10 @@ export const getAllConversations = async (
   let cursor: string | undefined;
   do {
     Log.debug(`\t\tcursor: ${cursor}, args: ${JSON.stringify(args)}`);
-    const res = await getHistoriesList({ ...args, cursor }, options);
+    const res = await getHistoriesList(
+      { exclude_archived: true, ...args, cursor },
+      options
+    );
     Log.debug(
       `\t\titem count: ${res.messages?.length} (thread: ${
         res.messages?.filter((m) => m.thread_ts).length
@@ -63,31 +66,30 @@ export const getAllConversations = async (
     );
     cursor = res.response_metadata?.next_cursor;
     for (const m of res.messages || []) {
-      // スレッドがあれば、そのスレッドの投稿も取得する
-      // ただし、memberIdsPosted が指定されている場合は、そのユーザーの投稿のみ取得する
       if (
-        m.thread_ts &&
-        (memberIdsPosted === undefined ||
-          memberIdsPosted?.find((id) =>
-            m.reply_users?.some((rid) => rid === id)
-          ))
-      ) {
+        m.type !== 'message' ||
+        m.subtype === 'channel_leave' ||
+        m.subtype === 'channel_join'
+      )
+        continue;
+      // スレッドがあれば、そのスレッドの投稿も取得する
+      // ただし、shouldFetchReplies によってはスレッドの投稿を取得しない場合もある
+      const fetchReplies =
+        typeof shouldFetchReplies === 'boolean'
+          ? shouldFetchReplies
+          : shouldFetchReplies(m);
+      if (m.thread_ts && fetchReplies) {
         // 取得したスレッドの投稿は、元の投稿の後に連なるように逆順にして追加する
-        messages.push(
-          ...(
-            await getAllReplies(
-              { channel: args.channel, ts: m.thread_ts },
-              memberIdsPosted,
-              options
-            )
-          ).reverse()
-        );
+        const threads = (
+          await getAllReplies(
+            { channel: args.channel, ts: m.thread_ts },
+            options
+          )
+        ).reverse();
+        messages.push(...threads);
+        Log.debug(`\t\tfetched thread: ${m.thread_ts} (${threads.length})`);
       } else {
-        if (
-          memberIdsPosted === undefined ||
-          memberIdsPosted?.includes(m.user ?? '')
-        )
-          messages.push(m);
+        messages.push(m);
       }
     }
   } while (cursor && convLimit > messages.length);
@@ -98,7 +100,6 @@ export const getAllConversations = async (
 
 export const getAllReplies = async (
   args: ConversationsRepliesArguments,
-  memberIdsPosted?: string[],
   options?: SlackDemoOptions
 ): Promise<Message[]> => {
   const messages = Array<Message>();
@@ -106,13 +107,7 @@ export const getAllReplies = async (
   do {
     const res = await getRepliesList({ ...args, cursor }, options);
     cursor = res.response_metadata?.next_cursor;
-    messages.push(
-      ...(res.messages?.filter(
-        (m) =>
-          memberIdsPosted === undefined ||
-          memberIdsPosted.includes(m.user ?? '')
-      ) || [])
-    );
+    messages.push(...(res.messages || []));
   } while (cursor);
 
   return messages;

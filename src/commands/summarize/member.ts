@@ -106,7 +106,7 @@ export const exec: CliExecFn = async (argv, progress) => {
   const conversations = await getAllConversations(
     { channel: channel.id, limit, oldest, latest },
     limit,
-    [user.id],
+    (m) => m.reply_users?.some((rid) => rid === user.id) || false,
     options
   );
 

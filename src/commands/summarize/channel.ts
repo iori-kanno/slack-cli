@@ -104,7 +104,7 @@ export const exec: CliExecFn = async (argv, progress) => {
   const targetMessages = await getAllConversations(
     { channel: channel.id, limit, oldest, latest },
     limit,
-    undefined,
+    true,
     options
   );
   if (targetMessages.length === 0) {

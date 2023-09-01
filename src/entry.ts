@@ -27,6 +27,7 @@ import * as Log from './lib/log';
   if (res.error) Log.error(res.error);
   if (res.text) Log.success(res.text);
   if (res.postArg) {
+    Log.success('post result to slack');
     await postMessageToSlack(res.postArg, { asBot: !res.asUser });
   }
 })();

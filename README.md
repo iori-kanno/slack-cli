@@ -11,21 +11,24 @@ https://api.slack.com/ にて作成して設定してください。
 
 また、必要に応じて `SLACK_TEAM_ID` も設定することができます。
 
-| 環境変数名            | 必須 | 用途                                                                               |
-| :-------------------- | :--: | :--------------------------------------------------------------------------------- |
-| SLACK_BOT_TOKEN       |  ⭕  | ボットトークン。Slack API を利用するために必須。                                   |
-| SLACK_TOKEN           |  ⭕  | ユーザートークン。Slack API をユーザーとして利用する際に利用。                     |
-| SLACK_TEAM_ID         |  ❌  | Slack の team_id。設定したトークンが複数チームに所属している場合指定する。         |
-| SLACK_SIGNING_SECRET  |  🔺  | Slash Command として BOT を起動させる場合必須。                                    |
-| OPENAI_API_KEY        |  ❌  | OpenAI の apiKey。summarize 関連のコマンドを使用する際に必須。                     |
-| OPENAI_API_BASE       |  ❌  | OpenAI の basePath。sumamrize 関連のコマンドを使用する際に必須。                   |
-| OPENAI_MODEL          |  ❌  | OpenAI の model。デフォルトは 'text-davinci-003'                                   |
-| OPENAI_API_VERSION    |  ❌  | OpenAI の api-version。デフォルトは '2022-12-01'                                   |
-| GOOGLE_SPREADSHEET_ID |  ❌  | GoogleSpreadsheet の ID。aggregate コマンドの取得結果を出力する場合に利用。（＊1） |
+| 環境変数名                         | 必須 | 用途                                                                                                      |
+| :--------------------------------- | :--: | :-------------------------------------------------------------------------------------------------------- |
+| SLACK_BOT_TOKEN                    |  ⭕  | ボットトークン。Slack API を利用するために必須。                                                          |
+| SLACK_TOKEN                        |  ⭕  | ユーザートークン。Slack API をユーザーとして利用する際に利用。                                            |
+| SLACK_TEAM_ID                      |  ❌  | Slack の team_id。設定したトークンが複数チームに所属している場合指定する。                                |
+| SLACK_SIGNING_SECRET               |  🔺  | Slash Command として BOT を起動させる場合必須。                                                           |
+| SLACK_ARCHIVE_WORKFLOW_WEBHOOK_URL |  ❌  | Slack チャンネルのアーカイブを行うワークフローの Webhook URL。archive コマンド利用する場合に利用。（＊1） |
+| OPENAI_API_KEY                     |  ❌  | OpenAI の apiKey。summarize 関連のコマンドを使用する際に必須。                                            |
+| OPENAI_API_BASE                    |  ❌  | OpenAI の basePath。sumamrize 関連のコマンドを使用する際に必須。                                          |
+| OPENAI_MODEL                       |  ❌  | OpenAI の model。デフォルトは 'text-davinci-003'                                                          |
+| OPENAI_API_VERSION                 |  ❌  | OpenAI の api-version。デフォルトは '2022-12-01'                                                          |
+| GOOGLE_SPREADSHEET_ID              |  ❌  | GoogleSpreadsheet の ID。aggregate コマンドの取得結果を出力する場合に利用。（＊2）                        |
 
 現状 SLACK_TOKEN も必須となってしまっているのでユーザートークンを使わない場合は SLACK_BOT_TOKEN と同じものを設定してください。
 
-（＊1）使用する場合 project root にスプレッドシートの利用権限が付与されている `.spreadsheet-credential.json` も必要。また、 `GOOGLE_SPREADSHEET_ID` で指定したスプレッドシートの編集権限が付いている必要がある。
+（＊1）使用する場合 https://api.slack.com/automation/triggers/webhook を参考にアーカイブするワークフローおよびトリガーを作成して Webhook URL を設定する必要がある。
+
+（＊2）使用する場合 project root にスプレッドシートの利用権限が付与されている `.spreadsheet-credential.json` も必要。また、 `GOOGLE_SPREADSHEET_ID` で指定したスプレッドシートの編集権限が付いている必要がある。
 
 ### Slack の必要な権限
 
@@ -58,12 +61,16 @@ bot:start --debug --permitted-users "UXXXXX,UYYYYY" --port 3001
 
 | コマンド名                                              | 概要                                                                                                                 |
 | :------------------------------------------------------ | :------------------------------------------------------------------------------------------------------------------- |
-| [aggregate:reactions](#aggregate-reactions)             | 指定された期間内に指定されたリアクション数が多いユーザーを最大 5 名リストアップする                                  |
-| [aggregate:members-reacted](#aggregate-members-reacted) | 指定された期間内に指定されたリアクションを最も行ったユーザー最大 5 名をリストアップする                              |
+| [aggregate:reactions](#aggregate-reactions)             | 指定された期間内に指定されたリアクション数が多いユーザーを上位 5 位までリストアップする                              |
+| [aggregate:members-reacted](#aggregate-members-reacted) | 指定された期間内に指定されたリアクションを最も行ったユーザー上位 5 位までリストアップする                            |
+| [archive:channel](#archive-channel)                     | 指定されたパブリックチャンネルをアーカイブする                                                                       |
+| [archive:inactive-channels](#archive-inactive-channels) | 指定された期間以上更新のないパブリックチャンネル全てをアーカイブする                                                 |
 | [delete:message](#delete-message)                       | 指定された投稿を削除する（この BOT が投稿したもののみ）る                                                            |
-| [listup:reactions](#listup-reactions)                   | 指定された投稿に付いているリアクションを集計してスレッドに投稿します                                                 |
 | [get:channels](#get-channels)                           | チャンネル一覧を出力する。オプションで各種フィルターやソートが使える                                                 |
 | [get:members](#get-members)                             | Slack に参加しているメンバー一覧を出力する。チャンネルを指定するとそのチャンネルに参加しているメンバーのみを出力する |
+| [get:usergroups](#get-usergroups)                       | ユーザーグループ一覧を表示する                                                                                       |
+| [get:usergroups:members](#get-usergroups-members)       | 指定された Usergroup に属するメンバー一覧を出力する                                                                  |
+| [listup:reactions](#listup-reactions)                   | 指定された投稿に付いているリアクションを集計してスレッドに投稿する                                                   |
 | [summarize:channel](#summarize-channel)                 | 指定されたチャンネルの直近の投稿を GPT で要約する                                                                    |
 | [summarize:member](#summarize-member)                   | 指定されたチャンネル x メンバーの直近の投稿を GPT で要約する                                                         |
 | [join:public-channels](#join-public-channels)           | BOT を全てのパブリックチャンネルに参加させる。ユーザートークンが必須                                                 |
@@ -90,6 +97,26 @@ slack-cli aggregate:members-reacted --start-date 2023-03-28 --reactions "www,+1"
 # => 2023年3月28日以降の投稿に :www:, :+1: を行ったユーザーを集計してトップ5を #general チャンネルへと投稿する。
 ```
 
+### arhive-channel
+
+```
+slack-cli archive:channel -h
+# => archive:channel コマンドのヘルプを表示
+
+slack-cli archive:channel --channel-id Cxxxxx
+# => 指定した channel-id Cxxxxx のパブリックチャンネルをアーカイブする
+```
+
+### archive-inactive-channels
+
+```
+slack-cli archive:inactive-channels -h
+# => slack-cli archive:inactive-channels コマンドのヘルプを表示
+
+slack-cli archive:inactive-channels --days 100
+# => 100日間投稿のないパブリックチャンネルをまとめてアーカイブする
+```
+
 ### delete-message
 
 ```
@@ -98,16 +125,6 @@ slack-cli delete:message --help
 
 slack-cli delete:message --url https://slack.com/archive/xxxxx
 # => --url で指定された BOT の投稿 URL を削除する
-```
-
-### listup-reactions
-
-```
-slack-cli listup:reactions --help
-# => listup:reactions コマンドのヘルプを表示
-
-slack-cli listup:reactions -u https://xxxx.slack.com/archives/XXXXX/p1672724638273089
-# => url で指定された投稿に対してその投稿スレッドにリアクションの集計結果を投稿する
 ```
 
 ### get-channels
@@ -128,6 +145,36 @@ slack-cli get:members --help
 
 slack-cli get:members --channel-name slack-test
 # => #slack-test チャンネルに参加しているメンバーの一覧を表示する
+```
+
+### get-usergroups
+
+```
+slack-cli get:usergroups --help
+# => get:usergroups コマンドのヘルプを表示
+
+slack-cli get:usergroups --includes club --sort-members --desc
+# => ユーザーグループ名に club を含む一覧を人数の多い順に表示する
+```
+
+### get-usergroups-members
+
+```
+slack-cli get:usergroups:members --help
+# => slack-cli get:usergroups:members コマンドのヘルプを表示
+
+slack-cli get:usergroups:members --usergroup-id Sxxxxxx
+# => 指定したユーザーグループのメンバー一覧を表示する
+```
+
+### listup-reactions
+
+```
+slack-cli listup:reactions --help
+# => listup:reactions コマンドのヘルプを表示
+
+slack-cli listup:reactions -u https://xxxx.slack.com/archives/XXXXX/p1672724638273089
+# => url で指定された投稿に対してその投稿スレッドにリアクションの集計結果を投稿する
 ```
 
 ### summarize-channel
