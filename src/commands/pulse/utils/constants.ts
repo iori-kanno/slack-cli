@@ -28,7 +28,7 @@ export const blockTemplates = [
     type: 'section',
     text: {
       type: 'mrkdwn',
-      text: '*回答時の調子を教えてください*',
+      text: '*回答時の仕事や職場環境の調子を教えてください*',
     },
   },
   {
