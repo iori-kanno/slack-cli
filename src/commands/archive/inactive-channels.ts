@@ -70,7 +70,6 @@ export const exec: CliExecFn = async (argv, progress) => {
   if (args === null) return error;
 
   if (args['--help']) {
-    Log.success(helpText);
     return { text: helpText };
   }
   if (!args['--days']) {
@@ -95,6 +94,13 @@ export const exec: CliExecFn = async (argv, progress) => {
       !c.is_org_shared
   );
   Log.success(`channels' count: ${channels.length}`);
+  const notJoinedChannels = channels.filter((c) => !c.is_member);
+  if (notJoinedChannels.length > 0)
+    Log.warn(
+      `unparticipated channels: \n${notJoinedChannels
+        .map((c) => `${c.name} (${c.id})`)
+        .join('\n')}`
+    );
   const targetChannels: {
     channel: Channel;
     createdAt: string;
@@ -103,6 +109,7 @@ export const exec: CliExecFn = async (argv, progress) => {
   for (let index = 0; channels.length > index; index++) {
     const channel = channels[index];
     Log.debug(`channel: ${channel.name}, ${index + 1}/${channels.length}`);
+    if (!channel.is_member) continue;
     try {
       const targetMessages = (
         await getAllConversations(
