@@ -24,14 +24,17 @@ Usage:
   slack-cli archive:inactive-channels --days 100 [options]
 
 Required:
-  --days          指定された日数以上更新のないチャンネルをアーカイブする
+  --days              指定された日数以上更新のないチャンネルをアーカイブする
 
 Options:
-  --channel-id    投稿先チャンネルID。結果を投稿したい場合に指定する。
-  --channel-name  投稿先チャンネル名。結果を投稿したい場合に指定する。
-  --help, -h      このヘルプを表示
-  --debug         デバッグモードで実行
-  --dry-run       実際に削除せずにログ出力する
+  --channel-id        投稿先チャンネルID。結果を投稿したい場合に指定する。
+  --channel-name      投稿先チャンネル名。結果を投稿したい場合に指定する。
+  --excludes          除外する文字列。カンマ区切りで複数指定可能。その場合の条件は OR
+  --excludes-prefix   除外するチャンネル名接頭辞。カンマ区切りで複数指定可能
+  --excludes-suffix   除外するチャンネル名接尾辞。カンマ区切りで複数指定可能
+  --help, -h          このヘルプを表示
+  --debug             デバッグモードで実行
+  --dry-run           実際に削除せずにログ出力する
 \`\`\`
 `;
 
@@ -43,6 +46,9 @@ function parseArgs(argv?: string[]) {
         '--days': Number,
         '--channel-id': String,
         '--channel-name': String,
+        '--excludes': String,
+        '--excludes-prefix': String,
+        '--excludes-suffix': String,
         '--help': Boolean,
         '--debug': Boolean,
         '--dry-run': Boolean,
@@ -82,7 +88,10 @@ export const exec: CliExecFn = async (argv, progress) => {
   const limit = 30;
   const targetDate = new Date();
   targetDate.setDate(targetDate.getDate() - days);
-  const channels = (
+  const excludes = args['--excludes']?.split(',') || [];
+  const excludesPrefix = args['--excludes-prefix']?.split(',') || [];
+  const excludesSuffix = args['--excludes-suffix']?.split(',') || [];
+  const allChannels = (
     await getAllChannels({ exclude_archived: true }, options)
   ).filter(
     (c) =>
@@ -93,8 +102,24 @@ export const exec: CliExecFn = async (argv, progress) => {
       !c.is_shared &&
       !c.is_org_shared
   );
-  Log.success(`channels' count: ${channels.length}`);
-  const notJoinedChannels = channels.filter((c) => !c.is_member);
+  const channels = allChannels
+    .filter((c) =>
+      excludes.length === 0 ? true : !excludes.some((i) => c.name?.includes(i))
+    )
+    .filter((c) =>
+      excludesPrefix.length === 0
+        ? true
+        : !excludesPrefix.some((i) => c.name?.startsWith(i))
+    )
+    .filter((c) =>
+      excludesSuffix.length === 0
+        ? true
+        : !excludesSuffix.some((i) => c.name?.endsWith(i))
+    );
+  Log.success(
+    `channels' count: ${allChannels.length}, excepted: ${channels.length}`
+  );
+  const notJoinedChannels = allChannels.filter((c) => !c.is_member);
   if (notJoinedChannels.length > 0)
     Log.warn(
       `unparticipated channels: \n${notJoinedChannels
@@ -168,8 +193,14 @@ export const exec: CliExecFn = async (argv, progress) => {
 
   const outputText = (forPost: boolean) => {
     if (!postChannel?.id && forPost) return undefined;
+    const excludeText =
+      channels.length !== allChannels.length
+        ? `（除外設定されている ${
+            allChannels.length - channels.length
+          }チャンネルを除いた）`
+        : '';
     return (
-      `${channels.length}チャンネルの内 ${days}日間更新のない ${
+      `${excludeText}${channels.length}チャンネルの内 ${days}日間更新のない ${
         targetChannels.length
       }チャンネル${
         options?.dryRun ? 'がアーカイブ対象です。' : 'をアーカイブしました。'
