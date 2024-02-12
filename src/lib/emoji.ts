@@ -44,5 +44,6 @@ export const replaceEmojiKeyIfNeeded = (key: string): string => {
     return 'hand_with_index_finger_and_thumb_crossed';
   if (key === 'face_with_open_eyes_and_hand_over_mouth')
     return 'face_with_hand_over_mouth';
+  if (key === 'large_red_circle') return 'red_circle';
   return key;
 };
