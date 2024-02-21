@@ -17,23 +17,26 @@ Usage:
   slack-cli get:channels [options]
 
 Options:
-  --filter-prefix   チャンネル名の前方一致
-  --filter-suffix   チャンネル名の後方一致
-  --includes        チャンネル名に含める文字列（,区切りで複数指定可能。その場合の条件は OR）
-  --excludes        チャンネル名から除外する文字列（,区切りで複数指定可能。その場合の条件は AND）
-  --max-members     チャンネルに参加している人数の上限
-  --min-members     チャンネルに参加している人数の下限
-  --sort-name       名前で並び替えて表示
-  --sort-date       日付で並び替えて表示
-  --sort-members    メンバー数順に並び替えて表示
-  --asc             --sort オプションと一緒に使用。デフォルトは asc
-  --desc            --sort オプションと一緒に使用。デフォルトは asc
-  --show-archived   アーカイブ済みのチャンネルのみ一覧表示する。--with-archived と併用不可
-  --with-archived   アーカイブ済みのチャンネルも一緒に一覧表示する。--show-archived と併用不可
+  --filter-prefix     チャンネル名の前方一致
+  --filter-suffix     チャンネル名の後方一致
+  --includes          チャンネル名に含める文字列（,区切りで複数指定可能。その場合の条件は OR）
+  --excludes          チャンネル名から除外する文字列（,区切りで複数指定可能。その場合の条件は AND）
+  --max-members       チャンネルに参加している人数の上限
+  --min-members       チャンネルに参加している人数の下限
+  --sort-name         名前で並び替えて表示
+  --sort-date         日付で並び替えて表示
+  --sort-members      メンバー数順に並び替えて表示
+  --asc               --sort オプションと一緒に使用。デフォルトは asc
+  --desc              --sort オプションと一緒に使用。デフォルトは asc
 
-  --help, -h        このヘルプを表示
-  TODO: 指定したチャンネルに投稿できるようにする
-  --dry-run         投稿はせずに投稿内容をログ出力する
+  # ref: https://api.slack.com/types/conversation#booleans
+  --with-archived     アーカイブ済みのチャンネル（is_archived）も一緒に一覧表示する。--show-archived と併用不可
+  --show-archived     アーカイブ済みのチャンネル（is_archived）のみ一覧表示する。--with-archived と併用不可
+  --show-shared       共有チャンネル（is_shared）のみ表示する。--show-org-shared と併用不可
+  --show-org-shared   組織共有チャンネル（is_org_shared）のみ表示する。--show-shared と併用不可
+
+  --help, -h          このヘルプを表示
+  --dry-run           投稿はせずに投稿内容をログ出力する
 \`\`\`
 `;
 
@@ -51,8 +54,10 @@ function parseArgs(argv?: string[]) {
         '--sort-members': Boolean,
         '--asc': Boolean,
         '--desc': Boolean,
-        '--show-archived': Boolean,
         '--with-archived': Boolean,
+        '--show-archived': Boolean,
+        '--show-shared': Boolean,
+        '--show-org-shared': Boolean,
         '--help': Boolean,
         '--debug': Boolean,
         '--max-members': Number,
@@ -100,17 +105,24 @@ export const exec: CliExecFn = async (argv) => {
     Log.error(error);
     return { error };
   }
+  if (args['--show-shared'] && args['--show-org-shared']) {
+    const error = '--show-shared と --show-org-shared は併用できません。';
+    Log.error(error);
+    return { error };
+  }
 
   const prefix = args['--filter-prefix'];
   const suffix = args['--filter-suffix'];
   const includes = args['--includes']?.split(',') || [];
   const excludes = args['--excludes']?.split(',') || [];
-  const showArchived = args['--show-archived'] || false;
-  const withArchived = args['--with-archived'] || false;
-  const excludeArchived = !(showArchived || withArchived);
   const asc = args['--asc'] ? true : !args['--desc'];
   const maxMembers = args['--max-members'];
   const minMembers = args['--min-members'];
+  const showArchived = args['--show-archived'] || false;
+  const withArchived = args['--with-archived'] || false;
+  const excludeArchived = !(showArchived || withArchived);
+  const showShared = args['--show-shared'] || false;
+  const showOrgShared = args['--show-org-shared'] || false;
 
   const options = parseOptions(args);
 
@@ -119,6 +131,8 @@ export const exec: CliExecFn = async (argv) => {
   )
     .filter((c) => !c.is_private)
     .filter((c) => (showArchived ? c.is_archived : true))
+    .filter((c) => (showShared ? c.is_shared : true))
+    .filter((c) => (showOrgShared ? c.is_org_shared : true))
     .filter((c) => {
       // 両方設定している場合は両方に一致する必要がある
       if (prefix && suffix) {
@@ -178,6 +192,8 @@ export const exec: CliExecFn = async (argv) => {
     minMembers !== undefined ? `下限人数: ${minMembers}` : undefined,
     showArchived ? '条件: アーカイブ済みのみ表示' : undefined,
     withArchived ? '条件: アーカイブ済みも表示' : undefined,
+    showShared ? '条件: 共有チャンネルのみ表示' : undefined,
+    showOrgShared ? '条件: 組織共有チャンネルのみ表示' : undefined,
   ]
     .filter((t) => t)
     .join('\n');
@@ -208,6 +224,6 @@ const additionalInfo = (c: Channel, numOfDigits: number) => {
   if (!c.members && !c.created && !c.is_archived) return '';
   const num = `${c.num_members}`.padStart(numOfDigits, ' ');
   return `(${num}人, ${convertToSimpleDate(c.created)}${
-    c.is_archived ? ', archived' : ''
-  })`;
+    c.is_shared ? ', shared' : ''
+  }${c.is_archived ? ', archived' : ''})`;
 };
