@@ -23,6 +23,7 @@ Options:
   --excludes          チャンネル名から除外する文字列（,区切りで複数指定可能。その場合の条件は AND）
   --max-members       チャンネルに参加している人数の上限
   --min-members       チャンネルに参加している人数の下限
+
   --sort-name         名前で並び替えて表示
   --sort-date         日付で並び替えて表示
   --sort-members      メンバー数順に並び替えて表示
@@ -35,6 +36,7 @@ Options:
   --show-shared       共有チャンネル（is_shared）のみ表示する。--show-org-shared と併用不可
   --show-org-shared   組織共有チャンネル（is_org_shared）のみ表示する。--show-shared と併用不可
 
+  --no-info           チャンネルの詳細情報を表示しない
   --help, -h          このヘルプを表示
   --dry-run           投稿はせずに投稿内容をログ出力する
 \`\`\`
@@ -58,6 +60,7 @@ function parseArgs(argv?: string[]) {
         '--show-archived': Boolean,
         '--show-shared': Boolean,
         '--show-org-shared': Boolean,
+        '--no-info': Boolean,
         '--help': Boolean,
         '--debug': Boolean,
         '--max-members': Number,
@@ -123,6 +126,7 @@ export const exec: CliExecFn = async (argv) => {
   const excludeArchived = !(showArchived || withArchived);
   const showShared = args['--show-shared'] || false;
   const showOrgShared = args['--show-org-shared'] || false;
+  const noInfo = args['--no-info'] || false;
 
   const options = parseOptions(args);
 
@@ -208,7 +212,7 @@ export const exec: CliExecFn = async (argv) => {
         c.id?.padEnd(11, ' ') +
         ': ' +
         c.name?.padEnd(maxLength + 1, ' ') +
-        `${additionalInfo(c, numOfDigits)}`
+        `${additionalInfo(c, numOfDigits, noInfo)}`
     )
     .join('\n')}`;
 
@@ -220,8 +224,9 @@ export const exec: CliExecFn = async (argv) => {
   return { text: '```\n' + response + '\n```' };
 };
 
-const additionalInfo = (c: Channel, numOfDigits: number) => {
+const additionalInfo = (c: Channel, numOfDigits: number, noInfo: boolean) => {
   if (!c.members && !c.created && !c.is_archived) return '';
+  if (noInfo) return '';
   const num = `${c.num_members}`.padStart(numOfDigits, ' ');
   return `(${num}人, ${convertToSimpleDate(c.created)}${
     c.is_shared ? ', shared' : ''
