@@ -28,7 +28,8 @@ Options:
   --sort-members    メンバー数順に並び替えて表示
   --asc             --sort オプションと一緒に使用。デフォルトは asc
   --desc            --sort オプションと一緒に使用。デフォルトは asc
-  --show-archived   アーカイブ済みのチャンネルも表示する。デフォルトは非表示
+  --show-archived   アーカイブ済みのチャンネルのみ一覧表示する。--with-archived と併用不可
+  --with-archived   アーカイブ済みのチャンネルも一緒に一覧表示する。--show-archived と併用不可
 
   --help, -h        このヘルプを表示
   TODO: 指定したチャンネルに投稿できるようにする
@@ -51,6 +52,7 @@ function parseArgs(argv?: string[]) {
         '--asc': Boolean,
         '--desc': Boolean,
         '--show-archived': Boolean,
+        '--with-archived': Boolean,
         '--help': Boolean,
         '--debug': Boolean,
         '--max-members': Number,
@@ -93,12 +95,19 @@ export const exec: CliExecFn = async (argv) => {
     Log.error(error);
     return { error };
   }
+  if (args['--show-archived'] && args['--with-archived']) {
+    const error = '--show-archived と --with-archived は併用できません。';
+    Log.error(error);
+    return { error };
+  }
 
   const prefix = args['--filter-prefix'];
   const suffix = args['--filter-suffix'];
   const includes = args['--includes']?.split(',') || [];
   const excludes = args['--excludes']?.split(',') || [];
-  const exculdeArchived = !args['--show-archived'];
+  const showArchived = args['--show-archived'] || false;
+  const withArchived = args['--with-archived'] || false;
+  const excludeArchived = !(showArchived || withArchived);
   const asc = args['--asc'] ? true : !args['--desc'];
   const maxMembers = args['--max-members'];
   const minMembers = args['--min-members'];
@@ -106,9 +115,10 @@ export const exec: CliExecFn = async (argv) => {
   const options = parseOptions(args);
 
   const channels = (
-    await getAllChannels({ exclude_archived: exculdeArchived }, options)
+    await getAllChannels({ exclude_archived: excludeArchived }, options)
   )
     .filter((c) => !c.is_private)
+    .filter((c) => (showArchived ? c.is_archived : true))
     .filter((c) => {
       // 両方設定している場合は両方に一致する必要がある
       if (prefix && suffix) {
@@ -166,6 +176,8 @@ export const exec: CliExecFn = async (argv) => {
     suffix ? `後方一致: ${suffix}` : undefined,
     maxMembers !== undefined ? `上限人数: ${maxMembers}` : undefined,
     minMembers !== undefined ? `下限人数: ${minMembers}` : undefined,
+    showArchived ? '条件: アーカイブ済みのみ表示' : undefined,
+    withArchived ? '条件: アーカイブ済みも表示' : undefined,
   ]
     .filter((t) => t)
     .join('\n');
