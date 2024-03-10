@@ -96,6 +96,9 @@ import { handleRespond } from './util';
         !args._.includes('--private') ?? command.text.indexOf('aggregate') > 0;
       const execCommandName = args._[0] || '--version';
       const execCommandArgs = args._.slice(1).filter((a) => a !== '--private');
+      if (isDebug) {
+        execCommandArgs.push('--debug');
+      }
       const customRespond = handleRespond(
         respond,
         command.channel_id,
