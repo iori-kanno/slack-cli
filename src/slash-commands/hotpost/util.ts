@@ -1,5 +1,6 @@
 import { getBotOption } from '../app';
 import { Hotpost } from './types';
+import * as Log from '../../lib/log';
 
 export const isHotpost = (hotpost: Hotpost) => {
   const option = getBotOption();
@@ -19,8 +20,16 @@ export const isEarlypost = (hotpost: Hotpost) => {
   return hotpost.reactionCount >= 5 && hotpost.usersCount >= 2;
 };
 
-export const buildUrl = (hotpost: Hotpost) => {
-  return `https://${getBotOption().slackDomain}/archives/${
-    hotpost.channel
-  }/p${hotpost.ts.replace('.', '')}`;
+export const buildUrl = async (client, hotpost: Hotpost) =>
+  getPermalink(client, hotpost.channel, hotpost.ts);
+
+export const getPermalink = async (client, channel: string, ts: string) => {
+  const res = await client.chat.getPermalink({
+    channel,
+    message_ts: ts,
+  });
+  Log.debug('getPermalink', res);
+  if (!res.ok)
+    return `https://slack.com/archives/${channel}/p${ts.replace('.', '')}`;
+  return res.permalink;
 };

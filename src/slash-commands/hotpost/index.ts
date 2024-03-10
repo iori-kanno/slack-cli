@@ -108,11 +108,12 @@ const postMessage = async (client, hotpost: Hotpost, type: 'hot' | 'early') => {
     Log.warn(`⚠ ${isHot ? 'hotChannel' : 'earlyChannel'} is not set`);
     return;
   }
+  const url = await buildUrl(client, hotpost);
   await client.chat.postMessage({
     channel,
     mrkdwn: true,
     unfurl_links: true,
-    text: `<${buildUrl(hotpost)}|This post> in <#${hotpost.channel}> ${
+    text: `<${url}|This post> in <#${hotpost.channel}> ${
       isHot ? 'is HOT' : 'might be HOT'
     } right now!`,
   });

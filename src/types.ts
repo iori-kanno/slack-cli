@@ -38,7 +38,6 @@ export type SlackDemoOptions = {
 };
 
 export type BotOption = {
-  slackDomain: string;
   isDev?: boolean;
   dryRun?: boolean;
   hotpostOption: {

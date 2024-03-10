@@ -35,7 +35,6 @@ import {
   const isDebug = !!args['--debug'];
   Log.setDebug(isDebug);
   const botOption = {
-    slackDomain: process.env.SLACK_DOMAIN || 'slack.com',
     isDev: !!args['--dev'],
     dryRun: false, // not supported yet
     hotpostOption: {
