@@ -30,7 +30,7 @@ https://api.slack.com/ にて作成して設定してください。
 
 （＊1）使用する場合 https://api.slack.com/automation/triggers/webhook を参考にアーカイブするワークフローおよびトリガーを作成して Webhook URL を設定する必要がある。
 
-（＊2）使用する場合 [Events API](https://api.slack.com/apis/connections/events-api) の `reaction_added` と `reactione_removed` 権限が必要。
+（＊2）使用する場合 [Events API](https://api.slack.com/apis/connections/events-api) の `reaction_added` と `reactione_removed` 権限が必要。また、SQLite3 をインストールしておく必要がある。
 
 （＊3）使用する場合 project root にスプレッドシートの利用権限が付与されている `.spreadsheet-credential.json` も必要。また、 `GOOGLE_SPREADSHEET_ID` で指定したスプレッドシートの編集権限が付いている必要がある。
 
