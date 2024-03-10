@@ -7,7 +7,11 @@ import { handleMonitoring } from './monitoring';
 import { handleReactionAdded, handleReactionRemoved } from './handler';
 import * as cron from 'node-cron';
 import { scheduledTask } from './hotpost/scheduled';
-import { makeChannelsCache, makeUsersCache } from './storage/memory';
+import {
+  dumpMemoryUsage,
+  makeChannelsCache,
+  makeUsersCache,
+} from './storage/memory';
 
 /* Add functionality here */
 
@@ -206,6 +210,7 @@ import { makeChannelsCache, makeUsersCache } from './storage/memory';
         makeUsersCache(app.client),
         makeChannelsCache(app.client),
       ]);
+      dumpMemoryUsage();
       Log.success('⏲ cron.schedule done');
     },
     {

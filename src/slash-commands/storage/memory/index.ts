@@ -1,4 +1,5 @@
 import { ChannelCache, UserCache } from './types';
+import * as Log from '../../../lib/log';
 
 let usersCache: UserCache[] = [];
 let channelsCache: ChannelCache[] = [];
@@ -49,4 +50,17 @@ export const makeChannelsCache = async (client) => {
   } while (cursor);
 
   channelsCache = channels;
+};
+
+export const dumpMemoryUsage = () => {
+  Log.debug('⚡️ dumpMemoryUsage');
+  try {
+    const heap = process.memoryUsage();
+    const msg = Object.entries(heap).map(
+      ([key, value]) => `${key}: ${Math.round(value / 1024 / 1024)} MB`
+    );
+    Log.success(`${new Date().toLocaleString()}: ` + msg.join(', '));
+  } catch (e) {
+    Log.error(e);
+  }
 };
