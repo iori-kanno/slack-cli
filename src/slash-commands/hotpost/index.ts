@@ -3,7 +3,6 @@ import * as Log from '../../lib/log';
 import { getBotOption } from '../app';
 import { findChannelCache, findUserCache } from '../storage/memory';
 import { createHotpost, getHotpost, updateHotpost } from '../storage/sqlite';
-import { fetchAndCreateHotpost } from './api';
 import { Hotpost } from './types';
 import { buildUrl, isEarlypost, isHotpost } from './util';
 
@@ -13,25 +12,33 @@ export const handleHotpost = async ({ event, client, ...args }) => {
     `channel: ${findChannelCache(event.item.channel)?.name}`,
     `user: ${findUserCache(event.user)?.name}`
   );
-  let hotpost = await getHotpost(event.item.channel, event.item.ts);
+  const hotpost = await getHotpost(event.item.channel, event.item.ts);
   if (!hotpost) {
-    hotpost = await fetchAndCreateHotpost(
-      client,
-      event.item.channel,
-      event.item.ts,
-      replaceTsToNumber(event.event_ts)
-    );
-    if (!hotpost) {
-      Log.warn(`  \tNot found: ${event.item.channel} ${event.item.ts}`);
-      return;
-    }
     if (event.type === 'reaction_added') {
-      Log.debug('  \tnew hotpost', hotpost);
+      Log.debug('\t\tnew hotpost');
+      await createHotpost({
+        channel: event.item.channel,
+        ts: event.item.ts,
+        reactionCount: 1,
+        reactions: {
+          [event.reaction]: 1,
+        },
+        usersCount: 1,
+        users: [event.user],
+
+        isEarly: false,
+        isHot: false,
+        updatedAt: replaceTsToNumber(event.event_ts),
+      });
     } else if (event.type === 'reaction_removed') {
-      Log.warn('  \treaction_removed but not found, so retrieve', hotpost);
+      Log.warn('  \treaction_removed but not found');
+      // TODO: fetch from API
     }
-    await createHotpost(hotpost);
-  } else if (event.type === 'reaction_added') {
+    return;
+  }
+
+  // Revaluate
+  if (event.type === 'reaction_added') {
     hotpost.reactions[event.reaction] =
       hotpost.reactions[event.reaction] + 1 || 1;
     hotpost.reactionCount = Object.entries(hotpost.reactions).reduce(
