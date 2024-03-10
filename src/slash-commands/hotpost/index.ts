@@ -7,7 +7,7 @@ import { Hotpost } from './types';
 import { buildUrl, isEarlypost, isHotpost } from './util';
 
 export const handleHotpost = async ({ event, client, ...args }) => {
-  Log.debug(
+  Log.success(
     '⚡️ handleHotpost',
     `channel: ${findChannelCache(event.item.channel)?.name}`,
     `user: ${findUserCache(event.user)?.name}`

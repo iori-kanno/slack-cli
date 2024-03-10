@@ -187,7 +187,7 @@ import { handleRespond } from './util';
 
   // Run every day at 3:00 AM
   cron.schedule(
-    '* 3 * * *',
+    '5 3 * * *',
     async () => {
       Log.success('⏲ cron.schedule start for wipe-hotposts');
       await scheduledTask();
