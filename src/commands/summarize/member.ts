@@ -1,13 +1,13 @@
 import arg from 'arg';
-import { invalidOptionText } from '../../lib/messages';
-import { CliExecFn } from '../../types';
-import * as Log from '../../lib/log';
-import { getAllConversations } from '../../api/slack/conversations';
-import { parseOptions } from '../../lib/parser';
-import { summarizeUser } from '../../api/gpt/summarize/user';
-import { retrieveInfoForArgs } from '../../lib/arguments';
-import { validate } from '../../api/gpt';
-import { convertDateToTs, convertTsToSimpleDate } from '../../lib/date';
+import { invalidOptionText } from '@/lib/messages';
+import { CliExecFn } from '@/types';
+import { Log } from '@/lib/log';
+import { getAllConversations } from '@/api/slack/conversations';
+import { parseOptions } from '@/lib/parser';
+import { summarizeUser } from '@/api/gpt/summarize/user';
+import { retrieveInfoForArgs } from '@/lib/arguments';
+import { validate } from '@/api/gpt';
+import { convertDateToTs, convertTsToSimpleDate } from '@/lib/date';
 
 const helpText = `
 \`\`\`

@@ -1,5 +1,5 @@
 import { getDb } from './initializer';
-import * as Log from '../../../lib/log';
+import { Log } from '@/lib/log';
 import { Hotpost } from '../../hotpost/types';
 
 interface RowData {

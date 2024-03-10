@@ -1,9 +1,9 @@
 import { Item } from '@slack/web-api/dist/response/ReactionsListResponse';
-import * as Log from './log';
-import { getAllReactedItems } from '../api/slack/reactions';
-import { retrieveAllUser } from '../api/user';
-import { ProgressCallback, SlackDemoOptions } from '../types';
+import { getAllReactedItems } from '@/api/slack/reactions';
+import { retrieveAllUser } from '@/api/user';
+import { ProgressCallback, SlackDemoOptions } from '@/types';
 import shuffle from 'just-shuffle';
+import { Log } from '@/lib/log';
 
 export const aggregateUniqItemsReactedByMembers = async (
   options: SlackDemoOptions,

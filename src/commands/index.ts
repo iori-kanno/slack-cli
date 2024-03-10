@@ -1,5 +1,5 @@
-import { notifyNeedUpdateCLI } from '../lib/notify-update';
-import { Commands, ExecOptions } from '../types';
+import { notifyNeedUpdateCLI } from '@/lib/notify-update';
+import { Commands, ExecOptions } from '@/types';
 import { help, version } from './help';
 import * as listUpReactions from './listup-reactions';
 import {
@@ -14,8 +14,8 @@ import { deleteMessage } from './delete';
 import { aggregateReactions, aggregateMembersReacted } from './aggregate';
 import * as joinAllPublicChannels from './join-all-public-channels';
 import { summarizeChannel, summarizeMember } from './summarize';
-import * as Log from '../lib/log';
-import { commandListText } from '../lib/messages';
+import { Log } from '@/lib/log';
+import { commandListText } from '@/lib/messages';
 import { archiveChannel, archiveInactiveChannels } from './archive';
 
 export async function exec(

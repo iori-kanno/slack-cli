@@ -2,8 +2,8 @@
 
 import arg from 'arg';
 import { exec } from './commands';
-import { postMessageToSlack } from './api/slack/chat';
-import * as Log from './lib/log';
+import { postMessageToSlack } from '@/api/slack/chat';
+import { Log } from '@/lib/log';
 
 (async () => {
   const args = arg(

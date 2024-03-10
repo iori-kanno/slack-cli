@@ -1,9 +1,9 @@
 import arg from 'arg';
-import { invalidOptionText } from '../../lib/messages';
-import { CliExecFn } from '../../types';
-import * as Log from '../../lib/log';
-import { getAllChannels } from '../../api/slack/channel';
-import { parseOptions } from '../../lib/parser';
+import { invalidOptionText } from '@/lib/messages';
+import { CliExecFn } from '@/types';
+import { Log } from '@/lib/log';
+import { getAllChannels } from '@/api/slack/channel';
+import { parseOptions } from '@/lib/parser';
 
 const helpText = `TODO: help text`;
 

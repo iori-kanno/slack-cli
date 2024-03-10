@@ -4,8 +4,8 @@ import {
   UsergroupsUsersListArguments,
   UsergroupsUsersListResponse,
 } from '@slack/web-api';
-import { botClient, userClient } from './index';
-import { SlackDemoOptions } from '../../types';
+import { botClient, userClient } from '@/api/slack';
+import { SlackDemoOptions } from '@/types';
 import { Usergroup } from '@slack/web-api/dist/response/UsergroupsListResponse';
 
 export const getUsergroupList = async (

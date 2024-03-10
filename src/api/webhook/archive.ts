@@ -1,5 +1,5 @@
-import { SlackDemoOptions } from '../../types';
-import * as Log from '../../lib/log';
+import { SlackDemoOptions } from '@/types';
+import { Log } from '@/lib/log';
 
 type Args = {
   channelId: string;

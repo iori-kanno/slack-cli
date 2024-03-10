@@ -1,18 +1,18 @@
 import arg from 'arg';
-import { invalidOptionText } from '../../lib/messages';
-import { CliExecFn } from '../../types';
-import * as Log from '../../lib/log';
-import { retrieveAllUser } from '../../api/user';
-import { aggregateReactionsForEachMember } from '../../api/reaction';
-import { postMessageToSlack } from '../../api/slack/chat';
-import { getAllChannels } from '../../api/slack/channel';
+import { invalidOptionText } from '@/lib/messages';
+import { CliExecFn } from '@/types';
+import { Log } from '@/lib/log';
+import { retrieveAllUser } from '@/api/user';
+import { aggregateReactionsForEachMember } from '@/api/reaction';
+import { postMessageToSlack } from '@/api/slack/chat';
+import { getAllChannels } from '@/api/slack/channel';
 import { Channel } from '@slack/web-api/dist/response/ChannelsListResponse';
 import groupBy from 'just-group-by';
-import { parseOptions } from '../../lib/parser';
+import { parseOptions } from '@/lib/parser';
 import { parseReactions } from './utils/reactions-parser';
-import { aggregateUniqItemsReactedByMembers } from '../../lib/aggregator';
+import { aggregateUniqItemsReactedByMembers } from '@/lib/aggregator';
 import { buildSheetReactions } from './utils/build-sheet';
-import { checkEmojiUniqueness } from '../../lib/emoji';
+import { checkEmojiUniqueness } from '@/lib/emoji';
 
 const helpText = `
 \`\`\`

@@ -1,6 +1,6 @@
-import { CliExecFn } from '../../types';
-import { getCurrentCliVersion } from '../../lib/helper';
-import * as Log from '../../lib/log';
+import { CliExecFn } from '@/types';
+import { getCurrentCliVersion } from '@/lib/helper';
+import { Log } from '@/lib/log';
 
 export const exec: CliExecFn = () => {
   const version = getCurrentCliVersion();

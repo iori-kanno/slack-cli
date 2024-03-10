@@ -1,12 +1,12 @@
 import arg from 'arg';
-import { invalidOptionText } from '../../lib/messages';
-import { CliExecFn } from '../../types';
-import * as Log from '../../lib/log';
-import { getAllChannels } from '../../api/slack/channel';
-import { parseOptions } from '../../lib/parser';
+import { invalidOptionText } from '@/lib/messages';
+import { CliExecFn } from '@/types';
+import { Log } from '@/lib/log';
+import { getAllChannels } from '@/api/slack/channel';
+import { parseOptions } from '@/lib/parser';
 import orderBy from 'just-order-by';
 import { Channel } from '@slack/web-api/dist/response/ChannelsListResponse';
-import { convertToSimpleDate } from '../../lib/date';
+import { convertToSimpleDate } from '@/lib/date';
 
 const helpText = `
 \`\`\`

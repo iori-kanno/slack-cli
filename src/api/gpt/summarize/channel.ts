@@ -1,7 +1,7 @@
-import { chatWithGpt } from '..';
-import { adjustTalks } from '../util';
-import * as Log from '../../../lib/log';
-import { ProgressCallback } from '../../../types';
+import { chatWithGpt } from '@/api/gpt';
+import { adjustTalks } from '@/api/gpt/util';
+import { Log } from '@/lib/log';
+import { ProgressCallback } from '@/types';
 
 const makePrompt = (talk: string, length: number) => `
 以下はSlackのとあるチャンネルの会話内容です。

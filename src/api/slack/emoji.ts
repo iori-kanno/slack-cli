@@ -1,6 +1,6 @@
 import { EmojiListArguments, EmojiListResponse } from '@slack/web-api';
-import { botClient, userClient } from './index';
-import { SlackDemoOptions } from '../../types';
+import { botClient, userClient } from '@/api/slack';
+import { SlackDemoOptions } from '@/types';
 
 export const getEmojiList = async (
   args: EmojiListArguments,

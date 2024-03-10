@@ -1,11 +1,11 @@
 import arg from 'arg';
-import { invalidOptionText } from '../../lib/messages';
-import { CliExecFn } from '../../types';
-import * as Log from '../../lib/log';
-import { showMembersInChannel } from '../../api/slack/channel';
-import { parseOptions } from '../../lib/parser';
-import { retrieveAllUser } from '../../api/user';
-import { retrieveInfoForArgs } from '../../lib/arguments';
+import { invalidOptionText } from '@/lib/messages';
+import { CliExecFn } from '@/types';
+import { Log } from '@/lib/log';
+import { showMembersInChannel } from '@/api/slack/channel';
+import { parseOptions } from '@/lib/parser';
+import { retrieveAllUser } from '@/api/user';
+import { retrieveInfoForArgs } from '@/lib/arguments';
 import { Member } from '@slack/web-api/dist/response/UsersListResponse';
 
 const helpText = `

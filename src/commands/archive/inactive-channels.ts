@@ -1,19 +1,19 @@
 import arg from 'arg';
-import { invalidOptionText } from '../../lib/messages';
-import { CliExecFn } from '../../types';
-import * as Log from '../../lib/log';
-import { parseOptions } from '../../lib/parser';
-import { getAllChannels } from '../../api/slack/channel';
-import { getAllConversations } from '../../api/slack/conversations';
+import { invalidOptionText } from '@/lib/messages';
+import { CliExecFn } from '@/types';
+import { Log } from '@/lib/log';
+import { parseOptions } from '@/lib/parser';
+import { getAllChannels } from '@/api/slack/channel';
+import { getAllConversations } from '@/api/slack/conversations';
 import {
   convertDateToSimpleDate,
   convertDateToTs,
   convertTsToSimpleDate,
-} from '../../lib/date';
-import { archiveChannel } from '../../api/webhook/archive';
-import { convertTsToDate, isWithinByDate } from '../../lib/helper';
+} from '@/lib/date';
+import { archiveChannel } from '@/api/webhook/archive';
+import { convertTsToDate, isWithinByDate } from '@/lib/helper';
 import { Channel } from '@slack/web-api/dist/response/AdminUsergroupsListChannelsResponse';
-import { retrieveInfoForArgs } from '../../lib/arguments';
+import { retrieveInfoForArgs } from '@/lib/arguments';
 
 const helpText = `
 \`\`\`

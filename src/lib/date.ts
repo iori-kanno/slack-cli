@@ -1,4 +1,4 @@
-import { convertTsToDate } from './helper';
+import { convertTsToDate } from '@/lib/helper';
 
 export const convertDateToSimpleDate = (date: Date) => {
   return (

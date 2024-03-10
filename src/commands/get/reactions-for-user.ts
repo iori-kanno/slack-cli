@@ -1,16 +1,16 @@
 import arg from 'arg';
-import { invalidOptionText } from '../../lib/messages';
-import { CliExecFn } from '../../types';
-import * as Log from '../../lib/log';
+import { invalidOptionText } from '@/lib/messages';
+import { CliExecFn } from '@/types';
+import { Log } from '@/lib/log';
 import {
   mapUserIdToMember,
   mapUserNameToMember,
   retrieveAllUser,
-} from '../../api/user';
+} from '@/api/user';
 import { Member } from '@slack/web-api/dist/response/UsersListResponse';
-import { getAllReactedItems } from '../../api/slack/reactions';
-import { aggregateReactionsForEachMember } from '../../api/reaction';
-import { parseOptions } from '../../lib/parser';
+import { getAllReactedItems } from '@/api/slack/reactions';
+import { aggregateReactionsForEachMember } from '@/api/reaction';
+import { parseOptions } from '@/lib/parser';
 
 const helpText = `TODO: help text`;
 

@@ -1,6 +1,6 @@
 import { exec } from '../commands';
 import arg from 'arg';
-import * as Log from '../lib/log';
+import { Log } from '@/lib/log';
 import { buildApp, setBotOption } from './app';
 import { handleRespond } from './util';
 import { handleMonitoring } from './monitoring';

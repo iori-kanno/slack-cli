@@ -1,4 +1,4 @@
-import { SlackDemoOptions } from '../../types';
+import { SlackDemoOptions } from '@/types';
 import { getChannelsList } from './conversations';
 import {
   ConversationsInfoArguments,
@@ -12,7 +12,7 @@ import {
   ConversationsMembersResponse,
 } from '@slack/web-api';
 import { Channel } from '@slack/web-api/dist/response/ChannelsListResponse';
-import * as Log from '../../lib/log';
+import { Log } from '@/lib/log';
 import { botClient, userClient } from '.';
 
 export const getAllChannels = async (
