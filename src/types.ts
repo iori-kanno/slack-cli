@@ -36,3 +36,12 @@ export type SlackDemoOptions = {
   endDate?: Date;
   includeBotIds?: string;
 };
+
+export type BotOption = {
+  isDev?: boolean;
+  dryRun?: boolean;
+  hotpostOption: {
+    earlyChannel?: string;
+    hotChannel?: string;
+  };
+};

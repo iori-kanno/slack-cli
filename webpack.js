@@ -41,6 +41,11 @@ module.exports = {
         callback();
       }
     },
+
+    // Do not include the sqlite3 binary file
+    {
+      sqlite3: 'commonjs sqlite3',
+    },
   ],
 
   resolve: {

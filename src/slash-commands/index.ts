@@ -1,9 +1,17 @@
 import { exec } from '../commands';
 import arg from 'arg';
 import * as Log from '../lib/log';
-import { buildApp } from './app';
+import { buildApp, setBotOption } from './app';
 import { handleRespond } from './util';
 import { handleMonitoring } from './monitoring';
+import { handleReactionAdded, handleReactionRemoved } from './handler';
+import * as cron from 'node-cron';
+import { scheduledTask } from './hotpost/scheduled';
+import {
+  dumpMemoryUsage,
+  makeChannelsCache,
+  makeUsersCache,
+} from './storage/memory';
 
 /* Add functionality here */
 
@@ -15,6 +23,9 @@ import { handleMonitoring } from './monitoring';
       '--socket-mode-disable': Boolean,
       '--port': Number,
       '--debug': Boolean,
+      '--dev': Boolean,
+      '--hot-channel': String,
+      '--early-channel': String,
     },
     {
       permissive: true,
@@ -23,6 +34,15 @@ import { handleMonitoring } from './monitoring';
 
   const isDebug = !!args['--debug'];
   Log.setDebug(isDebug);
+  const botOption = {
+    isDev: !!args['--dev'],
+    dryRun: false, // not supported yet
+    hotpostOption: {
+      hotChannel: args['--hot-channel'] || process.env.SLACK_HOT_CHANNEL,
+      earlyChannel: args['--early-channel'] || process.env.SLACK_EARLY_CHANNEL,
+    },
+  };
+  setBotOption(botOption);
 
   // Initialize your app
   const isSocketMode = !(args['--socket-mode-disable'] === true);
@@ -41,6 +61,7 @@ import { handleMonitoring } from './monitoring';
     Log.success(`⚡️ Bolt app is running on ${port} port!`);
   }
 
+  // TODO: move to handler.ts
   app.command('/slack-cli', async ({ command, ack, respond }) => {
     try {
       Log.debug('⚡️ command', command);
@@ -149,4 +170,53 @@ import { handleMonitoring } from './monitoring';
       await monitoring(command, `エラーが発生しました。${e}`);
     }
   });
+
+  // Process reaction events
+  if (
+    botOption.hotpostOption.hotChannel &&
+    botOption.hotpostOption.earlyChannel
+  ) {
+    Log.debug('handleReactionEvent is started');
+    app.event('reaction_added', handleReactionAdded);
+    app.event('reaction_removed', handleReactionRemoved);
+  } else {
+    Log.warn(
+      'handleReactionEvent is not started because hotChannel or earlyChannel is not set.'
+    );
+  }
+
+  // Run every day at 3:00 AM
+  cron.schedule(
+    '* 3 * * *',
+    async () => {
+      Log.success('⏲ cron.schedule start for wipe-hotposts');
+      await scheduledTask();
+      Log.success('⏲ cron.schedule done');
+    },
+    {
+      scheduled: true,
+      timezone: 'Asia/Tokyo',
+      name: 'wipe-hotposts',
+      runOnInit: false,
+    }
+  );
+  // Run every 2 hours
+  cron.schedule(
+    '20 */2 * * *',
+    async () => {
+      Log.success('⏲ cron.schedule start for update-caches');
+      await Promise.all([
+        makeUsersCache(app.client),
+        makeChannelsCache(app.client),
+      ]);
+      dumpMemoryUsage();
+      Log.success('⏲ cron.schedule done');
+    },
+    {
+      scheduled: true,
+      timezone: 'Asia/Tokyo',
+      name: 'update-caches',
+      runOnInit: true,
+    }
+  );
 })();

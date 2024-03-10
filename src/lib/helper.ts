@@ -21,10 +21,14 @@ export async function getPublishedCliVersion() {
   // return latest;
 }
 
+export const replaceTsToNumber = (ts: string): number => {
+  // 1670135159.609009 => 1670135159609 に変換する
+  return parseInt(ts.slice(0, 14).replace('.', ''));
+};
+
 export const convertTsToDate = (ts: string): Date => {
   // unixtime から date へ変換する
-  // 1670135159.609009 => 1670135159609 に変換して new Date する
-  return new Date(parseInt(ts.slice(0, 14).replace('.', '')));
+  return new Date(replaceTsToNumber(ts));
 };
 
 export const isWithinByRawString = (

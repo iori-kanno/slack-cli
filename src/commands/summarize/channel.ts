@@ -6,16 +6,9 @@ import { getAllConversations } from '../../api/slack/conversations';
 import { parseOptions } from '../../lib/parser';
 import { retrieveInfoForArgs } from '../../lib/arguments';
 import { summarizeChannel } from '../../api/gpt/summarize/channel';
-import {
-  convertTsToDate,
-  replaceMemberIdToNameInTexts,
-} from '../../lib/helper';
+import { replaceMemberIdToNameInTexts } from '../../lib/helper';
 import { validate } from '../../api/gpt';
-import {
-  convertDateToTs,
-  convertToSimpleDate,
-  convertTsToSimpleDate,
-} from '../../lib/date';
+import { convertDateToTs, convertTsToSimpleDate } from '../../lib/date';
 
 const helpText = `
 \`\`\`

@@ -18,17 +18,21 @@ https://api.slack.com/ にて作成して設定してください。
 | SLACK_TEAM_ID                      |  ❌  | Slack の team_id。設定したトークンが複数チームに所属している場合指定する。                                |
 | SLACK_SIGNING_SECRET               |  🔺  | Slash Command として BOT を起動させる場合必須。                                                           |
 | SLACK_ARCHIVE_WORKFLOW_WEBHOOK_URL |  ❌  | Slack チャンネルのアーカイブを行うワークフローの Webhook URL。archive コマンド利用する場合に利用。（＊1） |
+| SLACK_EARLY_CHANNEL                |  ❌  | 条件を満たした投稿を通知する際の通知先。Slack BOT として起動させる場合に利用可能。（＊2）                 |
+| SLACK_HOT_CHANNEL                  |  ❌  | 条件を満たした投稿を通知する際の通知先。Slack BOT として起動させる場合に利用可能。（＊2）                 |
 | OPENAI_API_KEY                     |  ❌  | OpenAI の apiKey。summarize 関連のコマンドを使用する際に必須。                                            |
 | OPENAI_API_BASE                    |  ❌  | OpenAI の basePath。sumamrize 関連のコマンドを使用する際に必須。                                          |
 | OPENAI_MODEL                       |  ❌  | OpenAI の model。デフォルトは 'text-davinci-003'                                                          |
 | OPENAI_API_VERSION                 |  ❌  | OpenAI の api-version。デフォルトは '2022-12-01'                                                          |
-| GOOGLE_SPREADSHEET_ID              |  ❌  | GoogleSpreadsheet の ID。aggregate コマンドの取得結果を出力する場合に利用。（＊2）                        |
+| GOOGLE_SPREADSHEET_ID              |  ❌  | GoogleSpreadsheet の ID。aggregate コマンドの取得結果を出力する場合に利用。（＊3）                        |
 
 現状 SLACK_TOKEN も必須となってしまっているのでユーザートークンを使わない場合は SLACK_BOT_TOKEN と同じものを設定してください。
 
 （＊1）使用する場合 https://api.slack.com/automation/triggers/webhook を参考にアーカイブするワークフローおよびトリガーを作成して Webhook URL を設定する必要がある。
 
-（＊2）使用する場合 project root にスプレッドシートの利用権限が付与されている `.spreadsheet-credential.json` も必要。また、 `GOOGLE_SPREADSHEET_ID` で指定したスプレッドシートの編集権限が付いている必要がある。
+（＊2）使用する場合 [Events API](https://api.slack.com/apis/connections/events-api) の `reaction_added` と `reactione_removed` 権限が必要。また、SQLite3 をインストールしておく必要がある。
+
+（＊3）使用する場合 project root にスプレッドシートの利用権限が付与されている `.spreadsheet-credential.json` も必要。また、 `GOOGLE_SPREADSHEET_ID` で指定したスプレッドシートの編集権限が付いている必要がある。
 
 ### Slack の必要な権限
 
