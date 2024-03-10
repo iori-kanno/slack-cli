@@ -1,6 +1,6 @@
-import { getAllEmoji } from '../../../api/slack/emoji';
-import { mapSystemEmoji } from '../../../lib/emoji';
-import * as Log from '../../../lib/log';
+import { getAllEmoji } from '@/api/slack/emoji';
+import { mapSystemEmoji } from '@/lib/emoji';
+import { Log } from '@/lib/log';
 
 export const validateReactions = async (
   reactions: string[]

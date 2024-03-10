@@ -1,4 +1,3 @@
-import { validate } from '@slack/bolt/dist/WorkflowStep';
 import { validateReactions } from './validator';
 
 type ReturnValue = {

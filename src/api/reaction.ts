@@ -1,13 +1,13 @@
+import { postMessageToSlack } from '@/api/slack/chat';
+import { getReactions } from '@/api/slack/reactions';
+import { mapUserIdsToMembers } from '@/api/user';
+import { replaceEmojiKeyIfNeeded } from '@/lib/emoji';
+import { Log } from '@/lib/log';
+import { invalidOptionText } from '@/lib/messages';
+import { SlackDemoOptions } from '@/types';
 import { Reaction } from '@slack/web-api/dist/response/ReactionsGetResponse';
-import { mapUserIdsToMembers } from './user';
-import * as Log from '../lib/log';
-import { invalidOptionText } from '../lib/messages';
-import { getReactions } from './slack/reactions';
-import { SlackDemoOptions } from '../types';
-import { postMessageToSlack } from './slack/chat';
-import { Member } from '@slack/web-api/dist/response/UsersListResponse';
 import { Item } from '@slack/web-api/dist/response/ReactionsListResponse';
-import { replaceEmojiKeyIfNeeded } from '../lib/emoji';
+import { Member } from '@slack/web-api/dist/response/UsersListResponse';
 
 const getReactionsOnPost = async (
   channel?: string,

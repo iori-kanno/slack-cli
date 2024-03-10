@@ -1,25 +1,25 @@
-import colors from 'colors/safe';
 import { Logger, LogLevel } from '@slack/logger';
+import colors from 'colors/safe';
 
 let logger: Logger | undefined;
 let isDebug = false;
 
-export function setLogger(newLogger: Logger) {
+function setLogger(newLogger: Logger) {
   logger = newLogger;
 }
 
-export function setDebug(enabled?: boolean) {
+function setDebug(enabled?: boolean) {
   isDebug = enabled ?? false;
   logger?.setLevel(enabled ? LogLevel.DEBUG : LogLevel.INFO);
   success(`Debug mode is ${enabled ? 'enabled' : 'disabled'}.`);
 }
 
-export function error(message: any, ...optionalParams: any[]) {
+function error(message: any, ...optionalParams: any[]) {
   if (logger) logger.error(message, optionalParams);
   else console.error(colors.red('error:'), message, optionalParams);
 }
 
-export function success(message: any, ...optionalParams: any[]) {
+function success(message: any, ...optionalParams: any[]) {
   if (logger) logger.info(message, optionalParams);
   else
     console.log(
@@ -29,7 +29,7 @@ export function success(message: any, ...optionalParams: any[]) {
     );
 }
 
-export function debug(message: any, ...optionalParams: any[]) {
+function debug(message: any, ...optionalParams: any[]) {
   if (logger) logger.debug(message, optionalParams);
   else {
     if (!isDebug) return;
@@ -41,7 +41,7 @@ export function debug(message: any, ...optionalParams: any[]) {
   }
 }
 
-export function warn(message: any, ...optionalParams: any[]) {
+function warn(message: any, ...optionalParams: any[]) {
   if (logger) logger.warn(message, optionalParams);
   else
     console.warn(
@@ -50,3 +50,12 @@ export function warn(message: any, ...optionalParams: any[]) {
       optionalParams.length === 0 ? '' : optionalParams
     );
 }
+
+export const Log = {
+  setLogger,
+  setDebug,
+  error,
+  success,
+  debug,
+  warn,
+};

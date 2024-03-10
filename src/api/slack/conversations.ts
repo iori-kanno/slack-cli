@@ -1,17 +1,15 @@
-import { botClient, userClient } from './index';
-import { SlackDemoOptions } from '../../types';
+import { botClient, userClient } from '@/api/slack';
+import { Log } from '@/lib/log';
+import { SlackDemoOptions } from '@/types';
 import {
   ConversationsHistoryArguments,
   ConversationsHistoryResponse,
   ConversationsListArguments,
   ConversationsListResponse,
-  ConversationsOpenArguments,
-  ConversationsOpenResponse,
   ConversationsRepliesArguments,
   ConversationsRepliesResponse,
 } from '@slack/web-api';
 import { Message } from '@slack/web-api/dist/response/ConversationsHistoryResponse';
-import * as Log from '../../lib/log';
 
 /** 特定チャンネルへの投稿一覧 */
 export const getHistoriesList = async (

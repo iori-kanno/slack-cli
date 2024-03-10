@@ -1,5 +1,5 @@
-import { botClient, userClient } from './index';
-import { SlackDemoOptions } from '../../types';
+import { botClient, userClient } from '@/api/slack';
+import { SlackDemoOptions } from '@/types';
 import {
   AuthTestArguments,
   AuthTestResponse,

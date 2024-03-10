@@ -1,4 +1,4 @@
-import * as Log from '../lib/log';
+import { Log } from '@/lib/log';
 import { handleHotpost } from './hotpost';
 
 export const handleReactionAdded = async ({ event, client, ...args }) => {

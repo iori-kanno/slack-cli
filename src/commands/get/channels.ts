@@ -1,12 +1,12 @@
-import arg from 'arg';
-import { invalidOptionText } from '../../lib/messages';
-import { CliExecFn } from '../../types';
-import * as Log from '../../lib/log';
-import { getAllChannels } from '../../api/slack/channel';
-import { parseOptions } from '../../lib/parser';
-import orderBy from 'just-order-by';
+import { getAllChannels } from '@/api/slack/channel';
+import { convertToSimpleDate } from '@/lib/date';
+import { Log } from '@/lib/log';
+import { invalidOptionText } from '@/lib/messages';
+import { parseOptions } from '@/lib/parser';
+import { CliExecFn } from '@/types';
 import { Channel } from '@slack/web-api/dist/response/ChannelsListResponse';
-import { convertToSimpleDate } from '../../lib/date';
+import arg from 'arg';
+import orderBy from 'just-order-by';
 
 const helpText = `
 \`\`\`
@@ -170,10 +170,10 @@ export const exec: CliExecFn = async (argv) => {
         return args['--sort-date']
           ? c.created
           : args['--sort-members']
-          ? c.num_members
-          : args['--sort-name']
-          ? c.name
-          : c.name; // default
+            ? c.num_members
+            : args['--sort-name']
+              ? c.name
+              : c.name; // default
       },
     },
   ]);

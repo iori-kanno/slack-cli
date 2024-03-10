@@ -1,5 +1,5 @@
+import { Log } from '@/lib/log';
 import { ChannelCache, UserCache } from './types';
-import * as Log from '../../../lib/log';
 
 let usersCache: UserCache[] = [];
 let channelsCache: ChannelCache[] = [];

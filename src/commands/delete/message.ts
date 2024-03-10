@@ -1,9 +1,9 @@
+import { deleteMessage } from '@/api/slack/chat';
+import { Log } from '@/lib/log';
+import { invalidOptionText } from '@/lib/messages';
+import { parseOptions, parseSlackUrl } from '@/lib/parser';
+import { CliExecFn } from '@/types';
 import arg from 'arg';
-import { invalidOptionText } from '../../lib/messages';
-import { CliExecFn } from '../../types';
-import * as Log from '../../lib/log';
-import { parseOptions, parseSlackUrl } from '../../lib/parser';
-import { deleteMessage } from '../../api/slack/chat';
 
 const helpText = `
 \`\`\`

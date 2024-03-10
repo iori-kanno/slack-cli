@@ -1,4 +1,4 @@
-import * as Log from '../../lib/log';
+import { Log } from '@/lib/log';
 import { deleteHotpostList, getHotpostList } from '../storage/sqlite';
 import { Hotpost } from './types';
 

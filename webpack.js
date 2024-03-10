@@ -1,4 +1,5 @@
 const webpack = require('webpack');
+const path = require('path');
 
 /**
  * @type {import('webpack').Configuration}
@@ -49,31 +50,23 @@ module.exports = {
   ],
 
   resolve: {
-    extensions: ['.js', '.ts', '.tsx'],
+    extensions: ['.js', '.ts', '.json'],
+    alias: {
+      '@': path.resolve(__dirname, 'src'),
+    },
   },
 
   module: {
     rules: [
-      // fsevents の `*.node` ファイルに対応するため
       {
-        test: /\.node$/,
-        loader: 'node-loader',
-      },
-      {
-        test: /\.ts$/,
+        test: /\.tsx?$/,
         exclude: /node_modules/,
-        use: [
-          {
-            loader: 'esbuild-loader',
-            options: {
-              loader: 'ts',
-
-              // >=14.0.0の動作を保証するため、
-              // "node14" ではなく "node14.0.0" を指定する
-              target: 'node14.0.0',
-            },
+        use: {
+          loader: 'ts-loader',
+          options: {
+            configFile: path.resolve(__dirname, 'tsconfig.json'),
           },
-        ],
+        },
       },
     ],
   },

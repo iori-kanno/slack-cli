@@ -1,6 +1,6 @@
+import { Log } from '@/lib/log';
 import { getBotOption } from '../app';
 import { Hotpost } from './types';
-import * as Log from '../../lib/log';
 
 export const isHotpost = (hotpost: Hotpost) => {
   const option = getBotOption();

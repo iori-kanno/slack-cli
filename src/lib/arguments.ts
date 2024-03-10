@@ -1,10 +1,10 @@
+import { getAllChannels } from '@/api/slack/channel';
+import { getAllUsergroups } from '@/api/slack/usergroups';
+import { retrieveAllUser } from '@/api/user';
+import { SlackDemoOptions } from '@/types';
 import { Channel } from '@slack/web-api/dist/response/ChannelsListResponse';
-import { Member } from '@slack/web-api/dist/response/UsersListResponse';
-import { getAllChannels } from '../api/slack/channel';
-import { retrieveAllUser } from '../api/user';
-import { SlackDemoOptions } from '../types';
-import { getAllUsergroups } from '../api/slack/usergroups';
 import { Usergroup } from '@slack/web-api/dist/response/UsergroupsListResponse';
+import { Member } from '@slack/web-api/dist/response/UsersListResponse';
 
 const channel = async (
   id?: string,

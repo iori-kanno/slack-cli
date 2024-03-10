@@ -1,10 +1,10 @@
+import { getAllUsergroups } from '@/api/slack/usergroups';
+import { convertToSimpleDate } from '@/lib/date';
+import { Log } from '@/lib/log';
+import { invalidOptionText } from '@/lib/messages';
+import { parseOptions } from '@/lib/parser';
+import { CliExecFn } from '@/types';
 import arg from 'arg';
-import { invalidOptionText } from '../../../lib/messages';
-import { CliExecFn } from '../../../types';
-import * as Log from '../../../lib/log';
-import { parseOptions } from '../../../lib/parser';
-import { getAllUsergroups } from '../../../api/slack/usergroups';
-import { convertToSimpleDate } from '../../../lib/date';
 import orderBy from 'just-order-by';
 
 const helpText = `
@@ -146,10 +146,10 @@ export const exec: CliExecFn = async (argv) => {
         return args['--sort-date']
           ? ug.date_create
           : args['--sort-members']
-          ? ug.user_count
-          : args['--sort-name']
-          ? ug.name
-          : ug.name; // default
+            ? ug.user_count
+            : args['--sort-name']
+              ? ug.name
+              : ug.name; // default
       },
     },
   ]);

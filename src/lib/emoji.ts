@@ -1,4 +1,4 @@
-import * as Log from './log';
+import { Log } from '@/lib/log';
 
 export const mapSystemEmoji = (reactions: string[]): string[] => {
   try {

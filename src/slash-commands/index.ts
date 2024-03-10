@@ -1,17 +1,17 @@
-import { exec } from '../commands';
+import { Log } from '@/lib/log';
 import arg from 'arg';
-import * as Log from '../lib/log';
-import { buildApp, setBotOption } from './app';
-import { handleRespond } from './util';
-import { handleMonitoring } from './monitoring';
-import { handleReactionAdded, handleReactionRemoved } from './handler';
 import * as cron from 'node-cron';
+import { exec } from '../commands';
+import { buildApp, setBotOption } from './app';
+import { handleReactionAdded, handleReactionRemoved } from './handler';
 import { scheduledTask } from './hotpost/scheduled';
+import { handleMonitoring } from './monitoring';
 import {
   dumpMemoryUsage,
   makeChannelsCache,
   makeUsersCache,
 } from './storage/memory';
+import { handleRespond } from './util';
 
 /* Add functionality here */
 
@@ -187,7 +187,7 @@ import {
 
   // Run every day at 3:00 AM
   cron.schedule(
-    '* 3 * * *',
+    '5 3 * * *',
     async () => {
       Log.success('⏲ cron.schedule start for wipe-hotposts');
       await scheduledTask();

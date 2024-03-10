@@ -1,8 +1,8 @@
+import { Log } from '@/lib/log';
 import {
-  ServiceAccountCredentials,
   GoogleSpreadsheet,
+  ServiceAccountCredentials,
 } from 'google-spreadsheet';
-import * as Log from '../../lib/log';
 
 export const spreadSheetClient = (sheetId: string) => {
   const doc = new GoogleSpreadsheet(sheetId);

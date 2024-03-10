@@ -1,5 +1,5 @@
+import { Log } from '@/lib/log';
 import { Configuration, CreateCompletionRequest, OpenAIApi } from 'openai';
-import * as Log from '../../lib/log';
 
 const DEFAULT_MODEL = 'text-davinci-003' as const;
 const DEFAULT_API_VERSION = '2022-12-01' as const;

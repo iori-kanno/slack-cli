@@ -1,6 +1,6 @@
-import { getDb } from './initializer';
-import * as Log from '../../../lib/log';
+import { Log } from '@/lib/log';
 import { Hotpost } from '../../hotpost/types';
+import { getDb } from './initializer';
 
 interface RowData {
   id: number;

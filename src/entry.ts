@@ -1,9 +1,9 @@
 // This file is called from npm bin script. See package.json for details
 
+import { postMessageToSlack } from '@/api/slack/chat';
+import { Log } from '@/lib/log';
 import arg from 'arg';
 import { exec } from './commands';
-import { postMessageToSlack } from './api/slack/chat';
-import * as Log from './lib/log';
 
 (async () => {
   const args = arg(

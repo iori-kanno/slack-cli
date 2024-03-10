@@ -1,3 +1,5 @@
+import { botClient, userClient } from '@/api/slack';
+import { SlackDemoOptions } from '@/types';
 import {
   ChatDeleteArguments,
   ChatDeleteResponse,
@@ -6,8 +8,6 @@ import {
   ChatUpdateArguments,
   ChatUpdateResponse,
 } from '@slack/web-api';
-import { botClient, userClient } from './index';
-import { SlackDemoOptions } from '../../types';
 
 // postMessage だと別のものに補完されてしまうので変更
 export const postMessageToSlack = async (

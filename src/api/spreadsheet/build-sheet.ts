@@ -1,6 +1,6 @@
-import { spreadSheetClient } from './client';
+import { spreadSheetClient } from '@/api/spreadsheet/client';
+import { Log } from '@/lib/log';
 import { GoogleSpreadsheetWorksheet } from 'google-spreadsheet';
-import * as Log from '../../lib/log';
 
 type SheetArg = {
   sheetId: string;

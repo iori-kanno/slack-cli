@@ -1,15 +1,11 @@
-// import pkg from '../../package.json';
-import { Message } from '@slack/web-api/dist/response/ChannelsHistoryResponse';
+import pkg from '@/../package.json';
+import { getAllUsergroups } from '@/api/slack/usergroups';
+import { getAllUsers } from '@/api/slack/users';
+import { SlackDemoOptions } from '@/types';
 import dayjs from 'dayjs';
-import { retrieveAllUser } from '../api/user';
-import { SlackDemoOptions } from '../types';
-import { getAllUsers } from '../api/slack/users';
-import { getAllUsergroups } from '../api/slack/usergroups';
 
 export function getCurrentCliVersion() {
-  return '0.1.0';
-  // TODO: load pkg
-  // return pkg.version;
+  return pkg.version;
 }
 
 export async function getPublishedCliVersion() {

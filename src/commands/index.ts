@@ -1,22 +1,22 @@
-import { notifyNeedUpdateCLI } from '../lib/notify-update';
-import { Commands, ExecOptions } from '../types';
-import { help, version } from './help';
-import * as listUpReactions from './listup-reactions';
+import { Log } from '@/lib/log';
+import { commandListText } from '@/lib/messages';
+import { notifyNeedUpdateCLI } from '@/lib/notify-update';
+import { Commands, ExecOptions } from '@/types';
+import { aggregateMembersReacted, aggregateReactions } from './aggregate';
+import { archiveChannel, archiveInactiveChannels } from './archive';
+import { deleteMessage } from './delete';
 import {
-  getReactionsForUser,
+  getChannels,
   getLatestPosts,
   getMembers,
-  getChannels,
-  getUsergroupMembers,
+  getReactionsForUser,
   getUsergroupList,
+  getUsergroupMembers,
 } from './get';
-import { deleteMessage } from './delete';
-import { aggregateReactions, aggregateMembersReacted } from './aggregate';
+import { help, version } from './help';
 import * as joinAllPublicChannels from './join-all-public-channels';
+import * as listUpReactions from './listup-reactions';
 import { summarizeChannel, summarizeMember } from './summarize';
-import * as Log from '../lib/log';
-import { commandListText } from '../lib/messages';
-import { archiveChannel, archiveInactiveChannels } from './archive';
 
 export async function exec(
   execCommandName: string,
