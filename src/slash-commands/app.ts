@@ -1,11 +1,14 @@
 import { App } from '@slack/bolt';
 import { ConsoleLogger } from '@slack/logger';
+import { BotOption } from '../types';
+import * as Log from '../lib/log';
 
 const logger = new ConsoleLogger();
 // Log で使用する Logger として設定すると混ざって見づらいのでセットしない方がいいかも
 // Log.setLogger(logger);
 
 let app: App;
+let option = {} as BotOption;
 
 export const getApp = () => {
   if (!app) {
@@ -32,3 +35,10 @@ export const buildApp = ({ socketMode = false }: Args) => {
   });
   return app;
 };
+
+export const setBotOption = (newOption: Partial<BotOption>) => {
+  option = { ...option, ...newOption };
+  Log.debug('setBotOption', option);
+};
+
+export const getBotOption = (): Readonly<BotOption> => option;
