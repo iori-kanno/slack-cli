@@ -1,18 +1,18 @@
-import arg from 'arg';
-import { invalidOptionText } from '@/lib/messages';
-import { CliExecFn } from '@/types';
-import { Log } from '@/lib/log';
-import { retrieveAllUser } from '@/api/user';
 import { aggregateReactionsForEachMember } from '@/api/reaction';
-import { postMessageToSlack } from '@/api/slack/chat';
 import { getAllChannels } from '@/api/slack/channel';
-import { Channel } from '@slack/web-api/dist/response/ChannelsListResponse';
-import groupBy from 'just-group-by';
-import { parseOptions } from '@/lib/parser';
-import { parseReactions } from './utils/reactions-parser';
+import { postMessageToSlack } from '@/api/slack/chat';
+import { retrieveAllUser } from '@/api/user';
 import { aggregateUniqItemsReactedByMembers } from '@/lib/aggregator';
-import { buildSheetReactions } from './utils/build-sheet';
 import { checkEmojiUniqueness } from '@/lib/emoji';
+import { Log } from '@/lib/log';
+import { invalidOptionText } from '@/lib/messages';
+import { parseOptions } from '@/lib/parser';
+import { CliExecFn } from '@/types';
+import { Channel } from '@slack/web-api/dist/response/ChannelsListResponse';
+import arg from 'arg';
+import groupBy from 'just-group-by';
+import { buildSheetReactions } from './utils/build-sheet';
+import { parseReactions } from './utils/reactions-parser';
 
 const helpText = `
 \`\`\`

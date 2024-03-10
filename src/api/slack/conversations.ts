@@ -1,4 +1,5 @@
 import { botClient, userClient } from '@/api/slack';
+import { Log } from '@/lib/log';
 import { SlackDemoOptions } from '@/types';
 import {
   ConversationsHistoryArguments,
@@ -9,7 +10,6 @@ import {
   ConversationsRepliesResponse,
 } from '@slack/web-api';
 import { Message } from '@slack/web-api/dist/response/ConversationsHistoryResponse';
-import { Log } from '@/lib/log';
 
 /** 特定チャンネルへの投稿一覧 */
 export const getHistoriesList = async (

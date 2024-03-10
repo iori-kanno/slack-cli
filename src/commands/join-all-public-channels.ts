@@ -1,14 +1,14 @@
-import arg from 'arg';
-import { invalidOptionText } from '@/lib/messages';
-import { CliExecFn } from '@/types';
-import { Log } from '@/lib/log';
+import { fetchMe } from '@/api/slack/auth';
 import {
   getAllChannels,
   inviteToChannel,
   joinChannel,
 } from '@/api/slack/channel';
+import { Log } from '@/lib/log';
+import { invalidOptionText } from '@/lib/messages';
 import { parseOptions } from '@/lib/parser';
-import { fetchMe } from '@/api/slack/auth';
+import { CliExecFn } from '@/types';
+import arg from 'arg';
 
 const helpText = `
 \`\`\`

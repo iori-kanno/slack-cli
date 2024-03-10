@@ -1,8 +1,8 @@
 import pkg from '@/../package.json';
-import dayjs from 'dayjs';
-import { SlackDemoOptions } from '@/types';
-import { getAllUsers } from '@/api/slack/users';
 import { getAllUsergroups } from '@/api/slack/usergroups';
+import { getAllUsers } from '@/api/slack/users';
+import { SlackDemoOptions } from '@/types';
+import dayjs from 'dayjs';
 
 export function getCurrentCliVersion() {
   return pkg.version;

@@ -1,22 +1,22 @@
-import { notifyNeedUpdateCLI } from '@/lib/notify-update';
-import { Commands, ExecOptions } from '@/types';
-import { help, version } from './help';
-import * as listUpReactions from './listup-reactions';
-import {
-  getReactionsForUser,
-  getLatestPosts,
-  getMembers,
-  getChannels,
-  getUsergroupMembers,
-  getUsergroupList,
-} from './get';
-import { deleteMessage } from './delete';
-import { aggregateReactions, aggregateMembersReacted } from './aggregate';
-import * as joinAllPublicChannels from './join-all-public-channels';
-import { summarizeChannel, summarizeMember } from './summarize';
 import { Log } from '@/lib/log';
 import { commandListText } from '@/lib/messages';
+import { notifyNeedUpdateCLI } from '@/lib/notify-update';
+import { Commands, ExecOptions } from '@/types';
+import { aggregateMembersReacted, aggregateReactions } from './aggregate';
 import { archiveChannel, archiveInactiveChannels } from './archive';
+import { deleteMessage } from './delete';
+import {
+  getChannels,
+  getLatestPosts,
+  getMembers,
+  getReactionsForUser,
+  getUsergroupList,
+  getUsergroupMembers,
+} from './get';
+import { help, version } from './help';
+import * as joinAllPublicChannels from './join-all-public-channels';
+import * as listUpReactions from './listup-reactions';
+import { summarizeChannel, summarizeMember } from './summarize';
 
 export async function exec(
   execCommandName: string,

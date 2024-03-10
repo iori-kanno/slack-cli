@@ -1,10 +1,10 @@
-import { GoogleSpreadsheetWorksheet } from 'google-spreadsheet';
 import { getAllEmoji } from '@/api/slack/emoji';
 import { getAllUsers } from '@/api/slack/users';
 import { buildSheet } from '@/api/spreadsheet/build-sheet';
+import { mapSystemEmoji } from '@/lib/emoji';
 import { Log } from '@/lib/log';
 import { SlackDemoOptions } from '@/types';
-import { mapSystemEmoji } from '@/lib/emoji';
+import { GoogleSpreadsheetWorksheet } from 'google-spreadsheet';
 
 const dateTimeString = () => {
   // NOTE: スプレッドシートにコロン `:` が使えないので時分秒を使う

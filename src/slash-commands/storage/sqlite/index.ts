@@ -1,8 +1,8 @@
 export {
   createHotpost,
   deleteHotpost,
-  getHotpost,
-  updateHotpost,
-  getHotpostList,
   deleteHotpostList,
+  getHotpost,
+  getHotpostList,
+  updateHotpost,
 } from './hotpost';

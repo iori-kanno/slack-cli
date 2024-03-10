@@ -1,7 +1,7 @@
+import { getAllUsers } from '@/api/slack/users';
+import { SlackDemoOptions } from '@/types';
 import { Member } from '@slack/web-api/dist/response/UsersListResponse';
 import compact from 'just-compact';
-import { SlackDemoOptions } from '@/types';
-import { getAllUsers } from '@/api/slack/users';
 
 const cachedMap: Record<string, Member | undefined> = {};
 

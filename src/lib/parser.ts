@@ -1,6 +1,6 @@
-import arg from 'arg';
-import { SlackDemoOptions } from '@/types';
 import { Log } from '@/lib/log';
+import { SlackDemoOptions } from '@/types';
+import arg from 'arg';
 
 export const parseOptions = (args: arg.Result<any>) => {
   Log.setDebug(args['--debug']);

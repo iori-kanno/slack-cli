@@ -1,7 +1,7 @@
-import { UsersListArguments, UsersListResponse } from '@slack/web-api';
-import { Member } from '@slack/web-api/dist/response/UsersListResponse';
 import { botClient, userClient } from '@/api/slack';
 import { SlackDemoOptions } from '@/types';
+import { UsersListArguments, UsersListResponse } from '@slack/web-api';
+import { Member } from '@slack/web-api/dist/response/UsersListResponse';
 
 export const getUsersList = async (
   args: UsersListArguments,

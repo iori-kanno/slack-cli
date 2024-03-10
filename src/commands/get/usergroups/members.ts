@@ -1,11 +1,11 @@
-import arg from 'arg';
-import { invalidOptionText } from '@/lib/messages';
-import { CliExecFn } from '@/types';
-import { Log } from '@/lib/log';
-import { parseOptions } from '@/lib/parser';
+import { getUsergroupsMembers } from '@/api/slack/usergroups';
 import { retrieveAllUser } from '@/api/user';
 import { retrieveInfoForArgs } from '@/lib/arguments';
-import { getUsergroupsMembers } from '@/api/slack/usergroups';
+import { Log } from '@/lib/log';
+import { invalidOptionText } from '@/lib/messages';
+import { parseOptions } from '@/lib/parser';
+import { CliExecFn } from '@/types';
+import arg from 'arg';
 
 const helpText = `
 \`\`\`

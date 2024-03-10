@@ -1,5 +1,5 @@
-import { encode } from 'gpt-3-encoder';
 import { Log } from '@/lib/log';
+import { encode } from 'gpt-3-encoder';
 
 interface TalkToken {
   talk: string;

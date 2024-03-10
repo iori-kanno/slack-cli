@@ -1,5 +1,5 @@
-import { App, SlashCommand } from '@slack/bolt';
 import { Log } from '@/lib/log';
+import { App, SlashCommand } from '@slack/bolt';
 
 export const handleMonitoring = (app: App, channelId?: string) => {
   return async (command: SlashCommand, extraMessage?: string) => {

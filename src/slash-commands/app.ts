@@ -1,7 +1,7 @@
+import { Log } from '@/lib/log';
+import { BotOption } from '@/types';
 import { App } from '@slack/bolt';
 import { ConsoleLogger } from '@slack/logger';
-import { BotOption } from '@/types';
-import { Log } from '@/lib/log';
 
 const logger = new ConsoleLogger();
 // Log で使用する Logger として設定すると混ざって見づらいのでセットしない方がいいかも

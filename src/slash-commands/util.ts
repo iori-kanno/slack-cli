@@ -1,7 +1,7 @@
+import { Log } from '@/lib/log';
+import { RespondFn } from '@slack/bolt';
 import { ChatPostMessageArguments } from '@slack/web-api';
 import { getApp } from './app';
-import { RespondFn } from '@slack/bolt';
-import { Log } from '@/lib/log';
 
 const customRespond = async (
   arg: ChatPostMessageArguments,

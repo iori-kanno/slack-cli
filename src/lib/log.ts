@@ -1,5 +1,5 @@
-import colors from 'colors/safe';
 import { Logger, LogLevel } from '@slack/logger';
+import colors from 'colors/safe';
 
 let logger: Logger | undefined;
 let isDebug = false;
