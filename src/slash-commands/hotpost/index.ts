@@ -9,8 +9,10 @@ import { buildUrl, isEarlypost, isHotpost } from './util';
 export const handleHotpost = async ({ event, client, ...args }) => {
   Log.success(
     '⚡️ handleHotpost',
+    `date: ${new Date(replaceTsToNumber(event.event_ts)).toLocaleString()}`,
     `channel: ${findChannelCache(event.item.channel)?.name}`,
-    `user: ${findUserCache(event.user)?.name}`
+    `user: ${findUserCache(event.user)?.name}`,
+    `reaction: ${event.reaction}`
   );
   const hotpost = await getHotpost(event.item.channel, event.item.ts);
   if (!hotpost) {
@@ -127,10 +129,10 @@ const postMessage = async (client, hotpost: Hotpost, type: 'hot' | 'early') => {
         type: 'section',
         text: {
           type: 'mrkdwn',
-          text: `${Object.entries(hotpost.reactions)
-            .sort((a, b) => a[1] - b[1])
+          text: `<${url}|${Object.entries(hotpost.reactions)
+            .sort((a, b) => b[1] - a[1])
             .map((kv, _) => `:${kv[0]}: ×${kv[1]}`)
-            .join(' ')}`,
+            .join(' ')}>`,
         },
       },
       {
