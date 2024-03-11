@@ -76,21 +76,30 @@ export const handleHotpost = async ({ event, client, ...args }) => {
     }
   }
   // Determine if notification is necessary
+  let needsToNotifyEarly = false;
+  let needsToNotifyHot = false;
   if (hotpost.isHot) {
     Log.debug('  \tAlready Hot, so do nothing');
   } else {
     if (isHotpost(hotpost)) {
       hotpost.isHot = true;
-      await postMessage(client, hotpost, 'hot');
+      needsToNotifyHot = true;
     } else if (hotpost.isEarly) {
       Log.debug('  \tNot applicable to Hot and already Early, so do nothing');
     } else if (isEarlypost(hotpost)) {
       hotpost.isEarly = true;
-      await postMessage(client, hotpost, 'early');
+      needsToNotifyEarly = true;
     }
   }
   // Save
   await updateHotpost(hotpost, replaceTsToNumber(event.event_ts));
+  // Notify
+  if (needsToNotifyEarly) {
+    await postMessage(client, hotpost, 'early');
+  }
+  if (needsToNotifyHot) {
+    await postMessage(client, hotpost, 'hot');
+  }
 };
 
 const postMessage = async (client, hotpost: Hotpost, type: 'hot' | 'early') => {

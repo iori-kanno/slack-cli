@@ -188,7 +188,7 @@ import { handleRespond } from './util';
     );
   }
 
-  // Run every day at 3:00 AM
+  // Run every day at 3:05 AM
   cron.schedule(
     '5 3 * * *',
     async () => {
