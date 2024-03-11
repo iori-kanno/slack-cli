@@ -9,8 +9,10 @@ import { buildUrl, isEarlypost, isHotpost } from './util';
 export const handleHotpost = async ({ event, client, ...args }) => {
   Log.success(
     '⚡️ handleHotpost',
+    `date: ${new Date(replaceTsToNumber(event.event_ts)).toLocaleString()}`,
     `channel: ${findChannelCache(event.item.channel)?.name}`,
-    `user: ${findUserCache(event.user)?.name}`
+    `user: ${findUserCache(event.user)?.name}`,
+    `reaction: ${event.reaction}`
   );
   const hotpost = await getHotpost(event.item.channel, event.item.ts);
   if (!hotpost) {
