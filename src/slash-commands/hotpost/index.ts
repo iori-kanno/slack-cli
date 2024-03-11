@@ -127,10 +127,10 @@ const postMessage = async (client, hotpost: Hotpost, type: 'hot' | 'early') => {
         type: 'section',
         text: {
           type: 'mrkdwn',
-          text: `${Object.entries(hotpost.reactions)
-            .sort((a, b) => a[1] - b[1])
+          text: `<${url}|${Object.entries(hotpost.reactions)
+            .sort((a, b) => b[1] - a[1])
             .map((kv, _) => `:${kv[0]}: ×${kv[1]}`)
-            .join(' ')}`,
+            .join(' ')}>`,
         },
       },
       {
