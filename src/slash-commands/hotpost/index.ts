@@ -131,7 +131,7 @@ const postMessage = async (client, hotpost: Hotpost, type: 'hot' | 'early') => {
   await client.chat.postMessage({
     channel,
     mrkdwn: true,
-    unfurl_links: true,
+    unfurl_links: false,
     text: ' ',
     blocks: [
       {
