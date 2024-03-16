@@ -4,6 +4,7 @@ import {
   inviteToChannel,
   joinChannel,
 } from '@/api/slack/channel';
+import { postMessageToSlack } from '@/api/slack/chat';
 import { Log } from '@/lib/log';
 import { invalidOptionText } from '@/lib/messages';
 import { parseOptions } from '@/lib/parser';
@@ -19,9 +20,12 @@ Usage:
   slack-cli join:public-channels [options]
 
 Options:
-  --help, -h        このヘルプを表示
-  --debug           デバッグモードで実行する
-  --dry-run         処理はせずに新規参加するチャンネルをログ出力する
+  --notify-channel      通知先チャンネル ID
+  --notify-icon         通知先チャンネルに表示するアイコン
+  --notify-display-name 通知先チャンネルに表示する名前
+  --help, -h            このヘルプを表示
+  --debug               デバッグモードで実行する
+  --dry-run             処理はせずに新規参加するチャンネルをログ出力する
 \`\`\`
 `;
 
@@ -30,6 +34,9 @@ function parseArgs(argv?: string[]) {
     return arg(
       {
         // Types
+        '--notify-channel': String,
+        '--notify-icon': String,
+        '--notify-display-name': String,
         '--dry-run': Boolean,
         '--help': Boolean,
         '--debug': Boolean,
@@ -68,31 +75,81 @@ export const exec: CliExecFn = async (argv) => {
     return;
   }
 
-  // 1. Bot が未参加のチャンネル一覧を取得して
-  // 2. 自分がまず先にチャンネルにジョインして
-  // 3. Bot を招待する
-  //    本当は2で既にジョイン済みならスキップしていい
-  await getAllChannels({}, { ...options, asBot: true }).then((channels) => {
-    return channels
-      .filter(
-        (ch) =>
-          ch.is_channel &&
-          !ch.is_member &&
-          !ch.is_archived &&
-          !ch.is_private &&
-          !ch.is_org_shared &&
-          !ch.is_shared
-      )
-      .map((ch) => {
-        Log.success(`Joining to #${ch.name} (${ch.id})...`);
-        return ch;
-      })
-      .map(async (ch) => {
-        await joinChannel({ channel: ch.id! }, { ...options, asBot: false });
-        await inviteToChannel(
-          { channel: ch.id!, users: botUserId },
-          { ...options, asBot: false }
-        );
+  const dryRun = args['--dry-run'];
+  const notifyChannel = args['--notify-channel'];
+  const notifyIcon = args['--notify-icon']
+    ? `:${args['--notify-icon'].replace(/:/g, '')}:`
+    : undefined;
+  const notifyDisplayName = args['--notify-display-name'];
+
+  // 1. Get the list of channels where Bot and User are not participating
+  // 2. User joins the channel first
+  // 3. User Invites Bot
+  await Promise.all([
+    // channel list to be invited
+    getAllChannels({}, { ...options, asBot: true }),
+    // channel list to invite BOT
+    getAllChannels({}, { ...options, asBot: false }),
+  ]).then(async ([channelsAsBot, channelsAsUser]) => {
+    const channelsToBeInvited = channelsAsBot.filter(
+      (ch) =>
+        ch.is_channel &&
+        !ch.is_member &&
+        !ch.is_archived &&
+        !ch.is_private &&
+        !ch.is_org_shared &&
+        !ch.is_shared
+    );
+    const joinedChannels = channelsAsUser.filter(
+      (ch) => channelsToBeInvited.some((c) => c.id === ch.id) && !ch.is_member
+    );
+    Log.debug(
+      'joinedChannels',
+      joinedChannels.map((ch) => `${ch.name} (${ch.id})`)
+    );
+    for (const ch of joinedChannels) {
+      const message = `${dryRun ? '[dry-run] ' : ''}User is joining to #${ch.name} (${ch.id})`;
+      Log.success(message);
+      if (dryRun) continue;
+      await joinChannel(
+        { channel: ch.id! },
+        { ...options, asBot: false }
+      ).catch((e) => {
+        Log.error(e);
       });
+    }
+    for (const ch of channelsToBeInvited) {
+      const message = `${dryRun ? '[dry-run] ' : ''}User is inviting BOT to #${ch.name} (${ch.id})`;
+      Log.success(message);
+      if (dryRun) continue;
+      await inviteToChannel(
+        { channel: ch.id!, users: botUserId },
+        { ...options, asBot: false }
+      ).catch((e) => {
+        Log.error(e);
+      });
+    }
+
+    if (!notifyChannel) return;
+    const text = `Hey, you joined following channels for me!\n${joinedChannels.map((ch) => `<#${ch.id}> ( \`${ch.name}\` )`).join('\n')}`;
+    if (dryRun) {
+      Log.success(
+        '[dry-run]',
+        notifyChannel,
+        notifyIcon,
+        notifyDisplayName,
+        text
+      );
+      return;
+    }
+    await postMessageToSlack(
+      {
+        channel: notifyChannel,
+        text,
+        username: notifyDisplayName,
+        icon_emoji: notifyIcon,
+      },
+      { ...options, asBot: true }
+    );
   });
 };
