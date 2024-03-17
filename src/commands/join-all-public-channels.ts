@@ -130,6 +130,7 @@ export const exec: CliExecFn = async (argv) => {
       });
     }
 
+    if (joinedChannels.length === 0) return;
     if (!notifyChannel) return;
     const text = `Hey, you joined following channels for me!\n${joinedChannels.map((ch) => `<#${ch.id}> ( \`${ch.name}\` )`).join('\n')}`;
     if (dryRun) {
