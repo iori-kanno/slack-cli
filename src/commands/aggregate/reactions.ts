@@ -84,6 +84,9 @@ export const exec: CliExecFn = async (argv, progress) => {
   const options = parseOptions(args);
   const { targetReactions, singleReactions, categorizedReactions } =
     await parseReactions(args['--reactions']);
+  const sortedOutputOrder = args['--reactions']
+    .replace(/\[([^\]]+)\]/g, (_, p1) => p1.split(',').join('::'))
+    .split(',');
 
   // dry-run でないなら投稿先チャンネルは必須
   let channel: Channel | undefined;
@@ -143,6 +146,7 @@ export const exec: CliExecFn = async (argv, progress) => {
     for (const reactionNames of categorizedReactions) {
       // 後で表示する際にそのまま使える形で key にする
       // そのため、最初と最後の : が不要（ aa::bb::cc となる）
+      // NOTE: 出力時のソートで同じロジックを別で行っているので注意
       const key = reactionNames
         .map((r, i) => `${i !== 0 ? ':' : ''}${r}`)
         .join(':');
@@ -174,8 +178,8 @@ export const exec: CliExecFn = async (argv, progress) => {
   for (const key of keys.sort(
     (a, b) =>
       // 与えられた入力順で出力できるようにソートする
-      targetReactions.findIndex((r) => r === a) -
-      targetReactions.findIndex((r) => r === b)
+      sortedOutputOrder.findIndex((r) => r === a) -
+      sortedOutputOrder.findIndex((r) => r === b)
   )) {
     // 同じ獲得数でまとめる
     const candidates = groupBy(
