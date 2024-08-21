@@ -102,6 +102,9 @@ export const exec: CliExecFn = async (argv, progress) => {
     (await aggregateUniqItemsReactedByMembers(options, progress)) || [];
   const { targetReactions, singleReactions, categorizedReactions } =
     await parseReactions(args['--reactions']);
+  const sortedOutputOrder = args['--reactions']
+    .replace(/\[([^\]]+)\]/g, (_, p1) => p1.split(',').join('::'))
+    .split(',');
 
   const users = await retrieveAllUser(options);
 
@@ -156,6 +159,7 @@ export const exec: CliExecFn = async (argv, progress) => {
     for (const reactionNames of categorizedReactions) {
       // 後で表示する際にそのまま使える形で key にする
       // そのため、最初と最後の : が不要（ aa::bb::cc となる）
+      // NOTE: 出力時のソートで同じロジックを別で行っているので注意
       const key = reactionNames
         .map((r, i) => `${i !== 0 ? ':' : ''}${r}`)
         .join(':');
@@ -181,7 +185,7 @@ export const exec: CliExecFn = async (argv, progress) => {
   for (const [rid, dict] of Object.entries(
     reactionNameToReactedMemberDict
   ).sort(
-    (a, b) => targetReactions.indexOf(a[0]) - targetReactions.indexOf(b[0])
+    (a, b) => sortedOutputOrder.indexOf(a[0]) - sortedOutputOrder.indexOf(b[0])
   )) {
     const candidates = groupBy(Object.entries(dict), ([mid, count]) => count);
     if (Object.keys(candidates).length === 0) {
