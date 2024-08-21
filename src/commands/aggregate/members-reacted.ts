@@ -141,7 +141,7 @@ export const exec: CliExecFn = async (argv, progress) => {
   }
 
   let url: string | undefined;
-  if (process.env.GOOGLE_SPREADSHEET_ID) {
+  if (process.env.GOOGLE_SPREADSHEET_ID && !options.dryRun) {
     url = await buildSheetMembersReacted(
       {
         sheetId: process.env.GOOGLE_SPREADSHEET_ID,

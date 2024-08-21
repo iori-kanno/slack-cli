@@ -23,7 +23,7 @@ export const buildSheet = async ({
   rows,
   adjust,
 }: SheetArg): Promise<SheetUrl | undefined> => {
-  const client = spreadSheetClient(sheetId);
+  const client = await spreadSheetClient(sheetId);
   if (!client) return;
   await client.loadInfo();
   Log.debug(`SpreadSheet: ${client.title}(id: ${client.spreadsheetId})`);
