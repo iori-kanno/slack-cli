@@ -31,8 +31,7 @@ export const retrieveAllUser = async (
         (options?.includeBotIds ?? '').split(',').some((id) => u.id === id)) &&
       !u.deleted &&
       !u.is_restricted &&
-      !u.is_ultra_restricted &&
-      !u.is_workflow_bot
+      !u.is_ultra_restricted
   );
 };
 
